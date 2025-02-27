@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Mon Tableau de Bord{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Mon Tableau de Bord</h1>
+    </div>
+
+    <!-- Section Statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Tests passés</h3>
+            <p class="stat-number">{{ total_tests }}</p>
+        </div>
+        <div class="stat-card">
+            <h3>Score moyen</h3>
+            <p class="stat-number">{{ "%.1f"|format(average_score) }}%</p>
+        </div>
+        <div class="stat-card">
+            <h3>Niveau actuel</h3>
+            <p class="stat-number">{{ test_results[0].level_achieved if test_results else 'N/A' }}</p>
+        </div>
+    </div>
+
+    <!-- Historique des tests -->
+    <div class="dashboard-section">
+        <h2>Historique des tests</h2>
+        {% if test_results %}
+        <div class="table-responsive">
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Test</th>
+                        <th>Niveau</th>
+                        <th>Score</th>
+                        <th>Date</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in test_results %}
+                    <tr>
+                        <td>{{ result.test.title }}</td>
+                        <td>{{ result.level_achieved }}</td>
+                        <td>{{ "%.1f"|format(result.score) }}%</td>
+                        <td>{{ result.completed_at.strftime('%d/%m/%Y') }}</td>
+                        <td>
+                            <span class="badge {% if result.validated %}badge-success{% else %}badge-warning{% endif %}">
+                                {{ "Validé" if result.validated else "En attente" }}
+                            </span>
+                        </td>
+                        <td class="actions">
+                            <a href="{{ url_for('test.show_result', result_id=result.id) }}" 
+                               class="btn btn-sm btn-secondary">Voir détails</a>
+                            {% if result.validated %}
+                            <a href="{{ url_for('dashboard.download_certificate', result_id=result.id) }}" 
+                               class="btn btn-sm btn-primary">Certificat</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-state">Vous n'avez pas encore passé de test.</p>
+        {% endif %}
+    </div>
+
+    <!-- Graphique de progression -->
+    <div class="dashboard-section">
+        <h2>Progression</h2>
+        <div class="progress-chart">
+            <!-- Nous ajouterons ici un graphique de progression plus tard -->
+            <p>Graphique en cours de développement</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

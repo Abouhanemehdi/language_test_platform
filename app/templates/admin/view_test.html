@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Visualiser Test - {{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>{{ test.title }}</h1>
+        <div class="test-info">
+            <span class="badge badge-primary">Niveau {{ test.level }}</span>
+            <span>{{ test.questions|length }} questions</span>
+            <span>Durée: {{ test.duration }} minutes</span>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h2>Questions</h2>
+        {% if test.questions %}
+            {% for question in test.questions %}
+            <div class="question-card">
+                <div class="question-header">
+                    <h3>Question {{ loop.index }}</h3>
+                    <span class="points">{{ question.points }} points</span>
+                </div>
+                
+                <p class="question-text">{{ question.question_text }}</p>
+
+                {% if question.question_type == 'qcm' %}
+                    <div class="answers-list">
+                        {% for answer in question.answers %}
+                        <div class="answer {% if answer.is_correct %}answer-correct{% endif %}">
+                            <span class="answer-marker">{{ loop.index }}</span>
+                            {{ answer.answer_text }}
+                            {% if answer.is_correct %}
+                                <span class="correct-badge">✓ Correcte</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="answer-type">
+                        <em>Question à réponse libre</em>
+                    </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">Ce test ne contient pas encore de questions.</p>
+        {% endif %}
+    </div>
+
+    <div class="admin-actions">
+        <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-primary">Éditer ce test</a>
+        <a href="{{ url_for('admin.manage_tests') }}" class="btn btn-secondary">Retour à la liste</a>
+    </div>
+</div>
+{% endblock %}

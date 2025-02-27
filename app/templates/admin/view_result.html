@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Détails du Résultat{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Détails du résultat</h1>
+        <div class="result-info">
+            <span class="badge {% if result.validated %}badge-success{% else %}badge-warning{% endif %}">
+                {{ "Validé" if result.validated else "En attente" }}
+            </span>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <div class="result-details">
+            <div class="info-group">
+                <h3>Informations générales</h3>
+                <table class="info-table">
+                    <tr>
+                        <th>Utilisateur :</th>
+                        <td>{{ result.user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Test :</th>
+                        <td>{{ result.test.title }}</td>
+                    </tr>
+                    <tr>
+                        <th>Date :</th>
+                        <td>{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    <tr>
+                        <th>Score :</th>
+                        <td>{{ "%.1f"|format(result.score) }}%</td>
+                    </tr>
+                    <tr>
+                        <th>Niveau atteint :</th>
+                        <td>{{ result.level_achieved }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="result-actions">
+            {% if not result.validated %}
+            <form method="POST" action="{{ url_for('admin.validate_result', result_id=result.id) }}">
+                <button type="submit" class="btn btn-success">Valider le résultat</button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('admin.generate_certificate', result_id=result.id) }}" 
+               class="btn btn-primary">Générer le certificat</a>
+            <a href="{{ url_for('admin.pending_results') }}" 
+               class="btn btn-secondary">Retour à la liste</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

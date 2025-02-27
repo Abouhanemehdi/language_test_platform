@@ -1,0 +1,329 @@
+/* Variables & Reset */
+:root {
+    --primary: #2C5364;
+    --secondary: #0F2027;
+    --accent: #FFD700;
+    --text: #333;
+    --light: #f8f9fa;
+    --white: #ffffff;
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+}
+
+/* Top Bar */
+.top-bar {
+    background: var(--secondary);
+    color: var(--white);
+    padding: 10px 0;
+    font-size: 14px;
+}
+
+.top-bar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.contact-info span {
+    margin-right: 20px;
+}
+
+.contact-info i {
+    margin-right: 5px;
+    color: var(--accent);
+}
+
+.social-links a {
+    color: var(--white);
+    margin-left: 15px;
+    transition: var(--transition);
+}
+
+.social-links a:hover {
+    color: var(--accent);
+}
+
+/* Main Slider/Hero */
+.main-slider {
+    height: 80vh;
+    background: linear-gradient(rgba(15, 32, 39, 0.8), rgba(44, 83, 100, 0.8)),
+                url('../images/hero-bg.jpg') no-repeat center center/cover;
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--white);
+}
+
+.slide-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.slide-content h1 {
+    font-size: 3.5rem;
+    margin-bottom: 20px;
+    animation: fadeInUp 1s ease;
+}
+
+.slide-content p {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    animation: fadeInUp 1.2s ease;
+}
+
+/* Features */
+.features {
+    padding: 80px 0;
+    background: var(--light);
+}
+
+.features .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.feature-box {
+    text-align: center;
+    padding: 40px 30px;
+    background: var(--white);
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: var(--transition);
+}
+
+.feature-box:hover {
+    transform: translateY(-10px);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: var(--primary);
+    color: var(--white);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+}
+
+/* Courses */
+.courses {
+    padding: 80px 0;
+}
+
+.section-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.course-card {
+    background: var(--white);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    transition: var(--transition);
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+}
+
+.course-image {
+    position: relative;
+    height: 200px;
+    overflow: hidden;
+}
+
+.course-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.level {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--accent);
+    color: var(--secondary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.course-content {
+    padding: 20px;
+}
+
+/* Call to Action */
+.cta {
+    background: linear-gradient(var(--primary), var(--secondary));
+    color: var(--white);
+    text-align: center;
+    padding: 80px 0;
+}
+
+.cta h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+}
+
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 30px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: var(--transition);
+    font-weight: 500;
+}
+
+.btn-primary {
+    background: var(--accent);
+    color: var(--secondary);
+}
+
+.btn-primary:hover {
+    background: #e6c200;
+}
+
+.btn-outline {
+    border: 2px solid var(--white);
+    color: var(--white);
+}
+
+.btn-outline:hover {
+    background: var(--white);
+    color: var(--primary);
+}
+
+.btn-light {
+    background: var(--white);
+    color: var(--primary);
+}
+
+.btn-light:hover {
+    background: var(--accent);
+    color: var(--secondary);
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media Queries */
+@media screen and (max-width: 768px) {
+    .slide-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .top-bar .container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .contact-info span {
+        display: block;
+        margin: 5px 0;
+    }
+    
+    .social-links {
+        margin-top: 10px;
+    }
+}
+
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+
+/* Ajoutez ceci à votre style.css */
+
+/* Hero background */
+.hero-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+.hero-background img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Course images */
+.course-card picture {
+    display: block;
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%; /* Ratio 4:3 */
+    position: relative;
+    overflow: hidden;
+}
+
+.course-card img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover img {
+    transform: scale(1.1);
+}
+
+/* Lazy loading animation */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+img[loading="lazy"] {
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in forwards;
+}

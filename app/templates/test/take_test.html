@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+
+{% block title %}{{ test.title }}{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <div class="test-header">
+        <h1>{{ test.title }}</h1>
+        <div class="timer" id="timer">
+            <i class="fas fa-clock"></i>
+            <span id="time-display">{{ test.duration }}:00</span>
+        </div>
+        <div class="question-counter">Question <span id="current-question">1</span>/{{ questions|length }}</div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress" id="progress-indicator" style="width: 33%"></div>
+    </div>
+
+    <form id="test-form" action="{{ url_for('test.submit_test', test_id=test.id) }}" method="POST">
+        {% for question in questions %}
+        <div class="question-block {% if loop.first %}active{% endif %}" data-question="{{ loop.index }}">
+            <div class="question-content">
+                <h2>Question {{ loop.index }}/{{ questions|length }}</h2>
+                <p class="question-text">{{ question.question_text }}</p>
+            </div>
+
+            <div class="answers-list">
+                {% for answer in question.answers %}
+                <div class="answer-option">
+                    <input type="radio" 
+                           id="q{{ question.id }}_a{{ answer.id }}" 
+                           name="q{{ question.id }}" 
+                           value="{{ answer.id }}"
+                           required>
+                    <label for="q{{ question.id }}_a{{ answer.id }}">{{ answer.answer_text }}</label>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="navigation-buttons">
+                {% if not loop.first %}
+                <button type="button" class="btn btn-secondary" onclick="prevQuestion()">Précédent</button>
+                {% endif %}
+                
+                {% if loop.last %}
+                <button type="submit" class="btn btn-primary">Terminer le test</button>
+                {% else %}
+                <button type="button" class="btn btn-primary" onclick="nextQuestion()">Suivant</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </form>
+</div>
+
+<style>
+.test-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.test-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background: #4285f4;
+    transition: width 0.3s ease;
+}
+
+.question-block {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.question-block.active {
+    display: block;
+}
+
+.question-content {
+    margin-bottom: 2rem;
+}
+
+.question-text {
+    font-size: 1.2rem;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+.answers-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.answer-option {
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.answer-option:hover {
+    background: #f8f9fa;
+    border-color: #4285f4;
+}
+
+.answer-option input[type="radio"] {
+    margin-right: 10px;
+}
+
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: #4285f4;
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.timer {
+    background: #f8f9fa;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #dc3545;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.timer i {
+    color: #dc3545;
+}
+
+.timer.warning {
+    animation: pulse 1s infinite;
+    background: #fff3cd;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+</style>
+
+<script>
+let currentQuestion = 1;
+const totalQuestions = {{ questions|length }};
+
+function updateProgress() {
+    const progress = (currentQuestion / totalQuestions) * 100;
+    document.getElementById('progress-indicator').style.width = `${progress}%`;
+    document.getElementById('current-question').textContent = currentQuestion;
+}
+
+function showQuestion(questionNumber) {
+    document.querySelectorAll('.question-block').forEach(q => q.classList.remove('active'));
+    document.querySelector(`[data-question="${questionNumber}"]`).classList.add('active');
+    currentQuestion = questionNumber;
+    updateProgress();
+}
+
+function nextQuestion() {
+    if (currentQuestion < totalQuestions) {
+        showQuestion(currentQuestion + 1);
+    }
+}
+
+function prevQuestion() {
+    if (currentQuestion > 1) {
+        showQuestion(currentQuestion - 1);
+    }
+}
+
+// Initialiser la première question
+updateProgress();
+
+// Timer functionality
+function startTimer(duration) {
+    let timer = duration * 60;
+    const timerDisplay = document.getElementById('time-display');
+    const timerContainer = document.getElementById('timer');
+
+    const countdown = setInterval(() => {
+        const minutes = Math.floor(timer / 60);
+        const seconds = timer % 60;
+
+        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timer <= 300) { // 5 minutes remaining
+            timerContainer.classList.add('warning');
+        }
+
+        if (timer <= 0) {
+            clearInterval(countdown);
+            document.getElementById('test-form').submit();
+        }
+
+        timer--;
+    }, 1000);
+}
+
+// Start the timer when page loads
+startTimer({{ test.duration }});
+</script>
+{% endblock %}

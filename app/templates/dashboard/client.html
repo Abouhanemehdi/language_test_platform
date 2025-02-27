@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Espace Client</h1>
+        <a href="{{ url_for('test.available_tests') }}" class="btn btn-primary">Voir tous les tests</a>
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Tests programmés</h2>
+        {% if scheduled_tests %}
+        <div class="scheduled-tests">
+            {% for test in scheduled_tests %}
+            <div class="test-card">
+                <h3>{{ test.title }}</h3>
+                <p>Date: {{ test.scheduled_for.strftime('%d/%m/%Y') }}</p>
+                <a href="{{ url_for('test.take_test', test_id=test.id) }}" class="btn btn-secondary">
+                    Commencer le test
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">Aucun test programmé.</p>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Mes certificats</h2>
+        {% if certified_results %}
+        <div class="certificates-list">
+            {% for result in certified_results %}
+            <div class="certificate-card">
+                <h3>Niveau {{ result.level_achieved }}</h3>
+                <p>Obtenu le {{ result.completed_at.strftime('%d/%m/%Y') }}</p>
+                <a href="{{ url_for('test.download_certificate', result_id=result.id) }}" 
+                   class="btn btn-secondary">
+                    Télécharger le certificat
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-state">Aucun certificat disponible.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

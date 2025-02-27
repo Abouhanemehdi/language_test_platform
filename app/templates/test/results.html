@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Résultats du Test{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <div class="result-header">
+        <h1>Résultats du test</h1>
+    </div>
+
+    <div class="result-card">
+        <h2>{{ result.test.title }}</h2>
+        
+        <div class="result-details">
+            <div class="result-stat">
+                <h3>Score obtenu</h3>
+                <p class="score">{{ "%.1f"|format(result.score) }}%</p>
+            </div>
+            
+            <div class="result-stat">
+                <h3>Niveau</h3>
+                <p class="level">{{ result.level_achieved }}</p>
+            </div>
+            
+            <div class="result-stat">
+                <h3>Date du test</h3>
+                <p>{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+        </div>
+
+        <div class="result-actions">
+            <a href="{{ url_for('test.available_tests') }}" class="btn btn-primary">Voir d'autres tests</a>
+            {% if not result.validated %}
+                <p class="pending-validation">En attente de validation par un administrateur</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

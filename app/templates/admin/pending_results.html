@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Résultats en attente{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Résultats en attente</h1>
+    </div>
+
+    <div class="admin-section">
+        {% if results %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Test</th>
+                        <th>Score</th>
+                        <th>Niveau</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in results %}
+                    <tr>
+                        <td>{{ result.user.username }}</td>
+                        <td>{{ result.test.title }}</td>
+                        <td>{{ "%.1f"|format(result.score) }}%</td>
+                        <td>{{ result.level_achieved }}</td>
+                        <td>{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('admin.view_result', result_id=result.id) }}" 
+                               class="btn btn-sm btn-info">Voir détails</a>
+                            <form method="POST" action="{{ url_for('admin.validate_result', result_id=result.id) }}" style="display: inline;">
+                                <button type="submit" class="btn btn-sm btn-success">Valider</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="empty-state">Aucun résultat en attente de validation.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Éditer le Test{% endblock %}
+
+{% block content %}
+<div class="edit-test-container">
+    <div class="edit-header">
+        <h1>Éditer le test : {{ test.title }}</h1>
+    </div>
+
+    <div class="edit-content">
+        <!-- Informations du test -->
+        <section class="test-info">
+            <h2>Informations générales</h2>
+            <form method="POST" class="edit-form">
+                <div class="form-group">
+                    <label for="title">Titre</label>
+                    <input type="text" id="title" name="title" value="{{ test.title }}" required class="form-control">
+                </div>
+
+                <div class="form-group">
+                    <label for="level">Niveau</label>
+                    <select id="level" name="level" required class="form-control">
+                        {% for level in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
+                            <option value="{{ level }}" {% if test.level == level %}selected{% endif %}>
+                                {{ level }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="user_role">Rôle utilisateur</label>
+                    <select id="user_role" name="user_role" required class="form-control">
+                        <option value="client" {% if test.user_role == 'client' %}selected{% endif %}>Client</option>
+                        <option value="prospect" {% if test.user_role == 'prospect' %}selected{% endif %}>Prospect</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_active" {% if test.is_active %}checked{% endif %}>
+                        Test actif
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            </form>
+        </section>
+
+        <!-- Liste des questions -->
+        <section class="questions-list">
+            <h2>Questions</h2>
+            <button class="btn btn-secondary" onclick="toggleAddQuestion()">Ajouter une question</button>
+
+            <form id="addQuestionForm" method="POST" action="{{ url_for('admin.add_question', test_id=test.id) }}" 
+                  class="add-question-form" style="display: none;">
+                <div class="form-group">
+                    <label for="question_text">Question</label>
+                    <textarea id="question_text" name="question_text" required class="form-control"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="question_type">Type de question</label>
+                    <select id="question_type" name="question_type" required class="form-control">
+                        <option value="qcm">Choix multiples</option>
+                        <option value="text">Réponse libre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="points">Points</label>
+                    <input type="number" id="points" name="points" value="1" min="1" required class="form-control">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Ajouter la question</button>
+            </form>
+
+            {% if test.questions %}
+                <div class="questions-grid">
+                    {% for question in test.questions %}
+                        <div class="question-card">
+                            <h3>Question {{ loop.index }}</h3>
+                            <p>{{ question.question_text }}</p>
+                            <div class="question-meta">
+                                <span>Type: {{ question.question_type }}</span>
+                                <span>Points: {{ question.points }}</span>
+                            </div>
+                            <div class="question-actions">
+                                <a href="{{ url_for('admin.edit_question', question_id=question.id) }}" 
+                                   class="btn btn-small btn-secondary">Éditer</a>
+                                <a href="{{ url_for('admin.delete_question', question_id=question.id) }}" 
+                                   class="btn btn-small btn-danger"
+                                   onclick="return confirm('Supprimer cette question ?')">Supprimer</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">Aucune question n'a été ajoutée à ce test.</p>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<script>
+function toggleAddQuestion() {
+    const form = document.getElementById('addQuestionForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}OXFORD INSTITUT - Centre d'Excellence en Langues{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>OXFORD INSTITUT</h1>
+        <p class="subtitle">Excellence et Innovation dans l'Apprentissage des Langues</p>
+        {% if not current_user.is_authenticated %}
+            <div class="cta-buttons">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Commencer votre parcours</a>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Se connecter</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+<!-- Image Gallery Section -->
+<section class="image-gallery">
+    <div class="container">
+        <h2>Notre Centre en Images</h2>
+        <div class="gallery-container">
+            <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/screenshot1.png') }}" alt="Salle de classe moderne" 
+                     loading="lazy">
+                <div class="image-overlay">
+                    <p>Salles de classe modernes</p>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/screenshot2.png') }}" alt="Cours en petit groupe" 
+                     loading="lazy">
+                <div class="image-overlay">
+                    <p>Cours en petits groupes</p>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/screenshot3.png') }}" alt="Laboratoire de langue" 
+                     loading="lazy">
+                <div class="image-overlay">
+                    <p>Laboratoire de langue</p>
+                </div>
+            </div>
+            <div class="gallery-item">
+                <img src="{{ url_for('static', filename='images/screenshot4.png') }}" alt="Espace détente" 
+                     loading="lazy">
+                <div class="image-overlay">
+                    <p>Espaces de détente</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Quick Stats -->
+<section class="stats">
+    <div class="container">
+        <div class="stat-item">
+            <h3>98%</h3>
+            <p>Taux de réussite</p>
+        </div>
+        <div class="stat-item">
+            <h3>1000+</h3>
+            <p>Étudiants certifiés</p>
+        </div>
+        <div class="stat-item">
+            <h3>15+</h3>
+            <p>Années d'expérience</p>
+        </div>
+    </div>
+</section>
+
+<!-- Niveaux de Tests -->
+<section class="levels">
+    <div class="container">
+        <h2>Nos Niveaux de Tests</h2>
+        <div class="levels-grid">
+            <div class="level-card">
+                <div class="level-header">
+                    <h3>Débutant (A1)</h3>
+                    <span class="level-tag">Fondamental</span>
+                </div>
+                <ul class="level-details">
+                    <li>Communication basique quotidienne</li>
+                    <li>Vocabulaire essentiel</li>
+                    <li>Grammaire fondamentale</li>
+                    <li>Durée: 60 minutes</li>
+                </ul>
+            </div>
+            <div class="level-card">
+                <div class="level-header">
+                    <h3>Intermédiaire (B1)</h3>
+                    <span class="level-tag">Avancé</span>
+                </div>
+                <ul class="level-details">
+                    <li>Expression courante fluide</li>
+                    <li>Vocabulaire professionnel</li>
+                    <li>Structures complexes</li>
+                    <li>Durée: 90 minutes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Nos Points Forts -->
+<section class="features">
+    <div class="container">
+        <h2>Pourquoi Nous Choisir ?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <i class="fas fa-certificate"></i>
+                <h3>Certification Officielle</h3>
+                <p>Certifications reconnues internationalement selon les standards CEFR</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-users"></i>
+                <h3>Professeurs Natifs</h3>
+                <p>Une équipe de professeurs qualifiés et expérimentés</p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-laptop"></i>
+                <h3>Plateforme Moderne</h3>
+                <p>Tests en ligne adaptés à votre niveau et votre progression</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Processus -->
+<section class="process">
+    <div class="container">
+        <h2>Comment ça marche ?</h2>
+        <div class="process-steps">
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Inscription</h3>
+                <p>Créez votre compte gratuitement</p>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Test de Niveau</h3>
+                <p>Évaluez votre niveau actuel</p>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Certification</h3>
+                <p>Obtenez votre certification officielle</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="cta">
+    <div class="container">
+        <h2>Prêt à commencer votre parcours ?</h2>
+        <p>Rejoignez les milliers d'étudiants qui ont déjà fait confiance à OXFORD INSTITUT</p>
+        {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">S'inscrire Gratuitement</a>
+        {% else %}
+            <a href="{{ url_for('test.available_tests') }}" class="btn btn-primary">Voir les Tests Disponibles</a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

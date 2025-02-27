@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Espace Prospect</h1>
+        {% if current_user.can_take_test() %}
+        <div class="info-box success">
+            <p>Vous pouvez passer un test gratuit pour évaluer votre niveau.</p>
+            <a href="{{ url_for('test.available_tests') }}" class="btn btn-primary">Commencer le test</a>
+        </div>
+        {% else %}
+        <div class="info-box warning">
+            <p>Vous avez déjà passé votre test gratuit.</p>
+            <p>Devenez client pour accéder à tous nos tests!</p>
+            <a href="#contact-sales" class="btn btn-primary">Devenir client</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="dashboard-section">
+        <h2>Mes résultats</h2>
+        {% if test_results %}
+        <div class="results-list">
+            <!-- Affichage des résultats -->
+        </div>
+        {% else %}
+        <p class="empty-state">Vous n'avez pas encore passé de test.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

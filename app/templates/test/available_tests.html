@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block title %}Tests Disponibles{% endblock %}
+
+{% block content %}
+<div class="test-container">
+    <div class="test-header">
+        <h1>Tests de niveau disponibles</h1>
+    </div>
+
+    <div class="tests-list">
+        {% if tests %}
+            {% for test in tests %}
+            <div class="test-card">
+                <h3>{{ test.title }}</h3>
+                <div class="test-details">
+                    <p><strong>Niveau :</strong> {{ test.level }}</p>
+                    <p><strong>Durée :</strong> {{ test.duration }} minutes</p>
+                    {% if test.description %}
+                        <p class="description">{{ test.description }}</p>
+                    {% endif %}
+                </div>
+                <div class="test-actions">
+                    <a href="{{ url_for('test.take_test', test_id=test.id) }}" class="btn btn-primary">
+                        Commencer le test
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="empty-state">Aucun test n'est disponible pour le moment.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

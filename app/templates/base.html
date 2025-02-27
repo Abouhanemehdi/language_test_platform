@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Plateforme de Tests</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+
+</head>
+<body>
+    <nav>
+        <div class="nav-links">
+            <a href="{{ url_for('main.index') }}">Accueil</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('admin.manage_tests') }}" class="nav-link">Gestion Tests</a>
+                    <a href="{{ url_for('admin.pending_results') }}" class="nav-link">Résultats en attente</a>
+                    <a href="{{ url_for('admin.manage_users') }}" class="nav-link">Gestion Utilisateurs</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard.user_dashboard') }}" class="nav-link">Mon Tableau de Bord</a>
+                {% endif %}
+                <span>{{ current_user.username }}</span>
+                <a href="{{ url_for('auth.logout') }}">Déconnexion</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}">Connexion</a>
+                <a href="{{ url_for('auth.register') }}">Inscription</a>
+            {% endif %}
+        </div>
+    </nav>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

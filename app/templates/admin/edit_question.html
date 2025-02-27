@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Éditer la Question{% endblock %}
+
+{% block content %}
+<div class="edit-question-container">
+    <div class="edit-header">
+        <h1>Éditer la question</h1>
+        <a href="{{ url_for('admin.edit_test', test_id=question.test_id) }}" class="btn btn-secondary">
+            Retour au test
+        </a>
+    </div>
+
+    <div class="edit-content">
+        <!-- Formulaire d'édition de la question -->
+        <section class="question-form-section">
+            <h2>Informations de la question</h2>
+            <form method="POST" class="edit-form">
+                <div class="form-group">
+                    <label for="question_text">Texte de la question</label>
+                    <textarea id="question_text" name="question_text" class="form-control" required rows="3">{{ question.question_text }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="question_type">Type de question</label>
+                    <select id="question_type" name="question_type" class="form-control" required>
+                        <option value="qcm" {% if question.question_type == 'qcm' %}selected{% endif %}>Choix multiples</option>
+                        <option value="text" {% if question.question_type == 'text' %}selected{% endif %}>Réponse libre</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="points">Points</label>
+                    <input type="number" id="points" name="points" value="{{ question.points }}" min="1" class="form-control" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            </form>
+        </section>
+
+        <!-- Section des réponses (uniquement pour les QCM) -->
+        {% if question.question_type == 'qcm' %}
+        <section class="answers-section">
+            <h2>Réponses</h2>
+            <button class="btn btn-secondary" onclick="toggleAddAnswer()">Ajouter une réponse</button>
+
+            <form id="addAnswerForm" method="POST" action="{{ url_for('admin.add_answer', question_id=question.id) }}" 
+                  class="add-answer-form" style="display: none;">
+                <div class="form-group">
+                    <label for="answer_text">Texte de la réponse</label>
+                    <input type="text" id="answer_text" name="answer_text" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="is_correct">
+                        Réponse correcte
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Ajouter la réponse</button>
+            </form>
+
+            {% if question.answers %}
+            <div class="answers-list">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Réponse</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for answer in question.answers %}
+                        <tr>
+                            <td>{{ answer.answer_text }}</td>
+                            <td>
+                                <span class="badge {% if answer.is_correct %}badge-success{% else %}badge-secondary{% endif %}">
+                                    {{ "Correcte" if answer.is_correct else "Incorrecte" }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn btn-small btn-secondary edit-answer-btn"
+                                            data-answer-id="{{ answer.id }}"
+                                            data-answer-text="{{ answer.answer_text }}"
+                                            data-is-correct="{{ answer.is_correct|tojson }}">
+                                            Éditer
+                                    </button>
+                                    <a href="{{ url_for('admin.delete_answer', answer_id=answer.id) }}" 
+                                       class="btn btn-small btn-danger"
+                                       onclick="return confirm('Supprimer cette réponse ?')">
+                                        Supprimer
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="empty-state">Aucune réponse n'a été ajoutée à cette question.</p>
+            {% endif %}
+        </section>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal pour éditer une réponse -->
+<div id="editAnswerModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <h3>Modifier la réponse</h3>
+        <form id="editAnswerForm" method="POST">
+            <div class="form-group">
+                <label for="edit_answer_text">Texte de la réponse</label>
+                <input type="text" id="edit_answer_text" name="answer_text" class="form-control" required>
+            </div>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="edit_is_correct" name="is_correct">
+                    Réponse correcte
+                </label>
+            </div>
+
+            <div class="modal-actions">
+                <button type="submit" class="btn btn-primary">Enregistrer</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Annuler</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.edit-answer-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const answerId = this.dataset.answerId;
+            const answerText = this.dataset.answerText;
+            const isCorrect = JSON.parse(this.dataset.isCorrect);
+            
+            const modal = document.getElementById('editAnswerModal');
+            const form = document.getElementById('editAnswerForm');
+            const textInput = document.getElementById('edit_answer_text');
+            const correctInput = document.getElementById('edit_is_correct');
+
+            textInput.value = answerText;
+            correctInput.checked = isCorrect;
+            form.action = `/admin/answer/${answerId}/edit`;
+            modal.style.display = 'block';
+        });
+    });
+});
+
+function toggleAddAnswer() {
+    const form = document.getElementById('addAnswerForm');
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function editAnswer(answerId, answerText, isCorrect) {
+    const modal = document.getElementById('editAnswerModal');
+    const form = document.getElementById('editAnswerForm');
+    const textInput = document.getElementById('edit_answer_text');
+    const correctInput = document.getElementById('edit_is_correct');
+
+    textInput.value = answerText;
+    correctInput.checked = isCorrect;
+    form.action = `/admin/answer/${answerId}/edit`;
+    modal.style.display = 'block';
+}
+
+function closeEditModal() {
+    document.getElementById('editAnswerModal').style.display = 'none';
+}
+
+// Fermer la modal si on clique en dehors
+window.onclick = function(event) {
+    const modal = document.getElementById('editAnswerModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+</script>
+
+<style>
+/* Styles pour la modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* Styles spécifiques à l'édition des questions */
+.edit-question-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.question-form-section,
+.answers-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.add-answer-form {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.answers-list {
+    margin-top: 1.5rem;
+}
+</style>
+{% endblock %}
