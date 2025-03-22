@@ -55,8 +55,14 @@ def login():
         
         user = User.query.filter_by(email=email).first()
         
+         # Vérifier si l'utilisateur existe, si le mot de passe est correct ET si le compte est actif
         if user is None or not user.check_password(password):
             flash("Email ou mot de passe incorrect")
+            return redirect(url_for('auth.login'))
+        
+        # Vérification supplémentaire pour voir si le compte est actif
+        if not user.is_active:
+            flash("Ce compte a été désactivé. Veuillez contacter l'administrateur.")
             return redirect(url_for('auth.login'))
             
         login_user(user, remember=bool(remember_me))

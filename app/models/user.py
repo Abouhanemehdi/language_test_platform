@@ -15,6 +15,16 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), nullable=False)  # 'prospect', 'client', 'admin'
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
+    active = db.Column(db.Boolean, default=True)  # Ajoutez cette ligne
+    
+    # Surcharge de la propriété is_active de UserMixin
+    @property
+    def is_active(self):
+        return self.active
+        
+    @is_active.setter
+    def is_active(self, value):
+        self.active = value
 
     test_results = db.relationship('TestResult', backref='user', lazy=True)
 

@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Détails du résultat{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="admin-header">
+        <h1>Détails du résultat</h1>
+        <span class="badge {% if result.validated %}badge-success{% else %}badge-warning{% endif %}">
+            {% if result.validated %}Validé{% else %}En attente{% endif %}
+        </span>
+    </div>
+
+    <div class="admin-section">
+        <h2>Informations générales</h2>
+        <div class="info-grid">
+            <div class="info-row">
+                <div class="info-label">Utilisateur :</div>
+                <div class="info-value">{{ user.username }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Test :</div>
+                <div class="info-value">{{ test.title }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Date :</div>
+                <div class="info-value">{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Score :</div>
+                <div class="info-value">{{ result.score|round(1) }}%</div>
+            </div>
+            <div class="info-row">
+                <div class="info-label">Niveau atteint :</div>
+                <div class="info-value">{{ result.level_achieved }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h2>Réponses</h2>
+        
+        {% for detail in answer_details %}
+        <div class="question-block">
+            <div class="question-header">
+                <h3>Question {{ loop.index }}</h3>
+                <span class="badge {% if detail.is_correct %}badge-success{% else %}badge-danger{% endif %}">
+                    {% if detail.is_correct %}Correct{% else %}Incorrect{% endif %}
+                </span>
+            </div>
+            <div class="question-content">
+                <div class="question-text">{{ detail.question.question_text }}</div>
+                
+                <div class="answer-row">
+                    <div class="answer-label">Réponse de l'utilisateur:</div>
+                    <div class="answer-value {% if not detail.is_correct %}incorrect{% endif %}">
+                        {% if detail.selected_answer %}
+                            {{ detail.selected_answer.answer_text }}
+                        {% else %}
+                            <em>Non répondue</em>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="answer-row">
+                    <div class="answer-label">Réponse correcte:</div>
+                    <div class="answer-value correct">
+                        {{ detail.correct_answer.answer_text }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="action-buttons">
+        <a href="javascript:history.back()" class="btn btn-secondary">
+            Retour à la liste
+        </a>
+        
+        {% if not result.validated %}
+        <form action="{{ url_for('admin.validate_result', result_id=result.id) }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-primary">
+                Valider le résultat
+            </button>
+        </form>
+        {% endif %}
+        
+        <a href="{{ url_for('admin.generate_certificate', result_id=result.id) }}" class="btn btn-success">
+            Générer un certificat
+        </a>
+    </div>
+</div>
+
+<style>
+.admin-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.admin-section {
+    background: white;
+    border-radius: 5px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.info-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.info-label {
+    font-weight: bold;
+}
+
+.question-block {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 1.5rem;
+}
+
+.question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+}
+
+.question-content {
+    padding: 1rem;
+}
+
+.question-text {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 5px;
+    margin-bottom: 1rem;
+}
+
+.answer-row {
+    display: grid;
+    grid-template-columns: 180px 1fr;
+    margin-bottom: 1rem;
+}
+
+.answer-label {
+    font-weight: bold;
+}
+
+.answer-value {
+    padding: 0.5rem;
+    border-radius: 3px;
+}
+
+.answer-value.correct {
+    background: rgba(40, 167, 69, 0.1);
+    border: 1px solid rgba(40, 167, 69, 0.2);
+}
+
+.answer-value.incorrect {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.2);
+}
+
+.badge {
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    border-radius: 0.25rem;
+    color: white;
+}
+
+.badge-success {
+    background-color: #28a745;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    display: inline-block;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border: 1px solid #007bff;
+}
+
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border: 1px solid #6c757d;
+}
+
+.btn-success {
+    color: #fff;
+    background-color: #28a745;
+    border: 1px solid #28a745;
+}
+</style>
+{% endblock %}

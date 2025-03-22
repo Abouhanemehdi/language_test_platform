@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, request, flash,
 from flask_login import login_required, current_user
 from app import db
 from app.models.user import User, TestResult 
-from app.models.test import Test, Question, Answer
+from app.models.test import Test, Question, Answer, UserAnswer
 from datetime import datetime
 from functools import wraps
 from reportlab.pdfgen import canvas
@@ -210,12 +210,12 @@ def edit_user(user_id):
             flash(f'Rôle de {user.username} mis à jour.')
     
     elif action == 'deactivate':
-        user.is_active = False
+        user.is_active = False  # Maintenant ceci devrait fonctionner
         db.session.commit()
         flash(f'Utilisateur {user.username} désactivé.')
     
     elif action == 'activate':
-        user.is_active = True
+        user.is_active = True  # Et ceci aussi
         db.session.commit()
         flash(f'Utilisateur {user.username} activé.')
 
@@ -326,3 +326,40 @@ def view_result(result_id):
     test = result.test
     user = result.user
     return render_template('admin/view_result.html', result=result, test=test, user=user)
+
+@bp.route('/result/<int:result_id>/detail')
+@admin_required
+def view_result_detail(result_id):
+    result = TestResult.query.get_or_404(result_id)
+    user = User.query.get(result.user_id)
+    test = Test.query.get(result.test_id)
+    
+    # Récupérer toutes les réponses de l'utilisateur
+    user_answers = UserAnswer.query.filter_by(test_result_id=result.id).all()
+    
+    # Pour chaque réponse, récupérer la question et la bonne réponse
+    answer_details = []
+    for user_answer in user_answers:
+        question = Question.query.get(user_answer.question_id)
+        correct_answer = Answer.query.filter_by(question_id=question.id, is_correct=True).first()
+        selected_answer = Answer.query.get(user_answer.answer_id) if user_answer.answer_id else None
+        
+        answer_details.append({
+            'question': question,
+            'selected_answer': selected_answer,
+            'correct_answer': correct_answer,
+            'is_correct': user_answer.is_correct
+        })
+    
+    return render_template('admin/result_detail.html', 
+                          result=result, 
+                          user=user, 
+                          test=test, 
+                          answer_details=answer_details)
+
+@bp.route('/results/validated')
+@admin_required
+def validated_results():
+    results = TestResult.query.filter_by(validated=True)\
+        .order_by(TestResult.completed_at.desc()).all()
+    return render_template('admin/validated_results.html', results=results)

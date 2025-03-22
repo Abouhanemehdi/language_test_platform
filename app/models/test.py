@@ -54,4 +54,19 @@ def get_next_level(current_level):
     except ValueError:
         pass
     return current_level
+
+class UserAnswer(db.Model):
+    __tablename__ = 'user_answers'
+    
+    id = db.Column(db.Integer, primary_key=True)
+    test_result_id = db.Column(db.Integer, db.ForeignKey('test_results.id'), nullable=False)
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.id'), nullable=False)
+    answer_id = db.Column(db.Integer, db.ForeignKey('answers.id'), nullable=True)  # Nullable pour les réponses textuelles
+    text_answer = db.Column(db.Text, nullable=True)  # Pour les questions à réponse libre
+    is_correct = db.Column(db.Boolean, default=False)
+    
+    # Relations
+    question = db.relationship('Question', backref='user_answers')
+    answer = db.relationship('Answer', backref='user_selections')
+    test_result = db.relationship('TestResult', backref='answers')
     

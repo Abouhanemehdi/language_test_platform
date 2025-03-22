@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
-from app.models.test import Test, Question, Answer, TestSession
+from app.models.test import Test, Question, Answer, TestSession, UserAnswer
 from app.models.user import TestResult  # Ajout de l'import de TestResult
 from app import db
 from datetime import datetime
@@ -94,47 +94,48 @@ def submit_test(test_id):
     total_points = 0
     earned_points = 0
     
+    # Créer le résultat du test
+    test_result = TestResult(
+        user_id=current_user.id,
+        test_id=test_id,
+        score=0,  # Temporaire
+        level_achieved=test.level,
+        completed_at=datetime.utcnow(),
+        validated=False
+    )
+    db.session.add(test_result)
+    db.session.flush()  # Pour obtenir l'ID
+    
+    # Enregistrer les réponses individuelles
     for question in questions:
         answer_id = request.form.get(f'q{question.id}')
+        is_correct = False
+        
         if answer_id:
             answer = Answer.query.get(answer_id)
             if answer and answer.is_correct:
                 earned_points += question.points
+                is_correct = True
+            
+            # Enregistrer la réponse de l'utilisateur
+            user_answer = UserAnswer(
+                test_result_id=test_result.id,
+                question_id=question.id,
+                answer_id=int(answer_id),
+                is_correct=is_correct
+            )
+            db.session.add(user_answer)
+        
         total_points += question.points
     
-    # Calcul du pourcentage
-    score_percentage = (earned_points / total_points * 100) if total_points > 0 else 0
-    
-    # Détermination du niveau atteint
-    level_achieved = test.level
-    if score_percentage >= 80:
-        level_achieved = get_next_level(test.level)
-    
-    # Enregistrement du résultat
-    test_result = TestResult(
-        user_id=current_user.id,
-        test_id=test_id,
-        score=score_percentage,
-        level_achieved=level_achieved,
-        completed_at=datetime.utcnow()
-    )
-    db.session.add(test_result)
-    
-    # Mise à jour de la session de test
-    test_session = TestSession.query.filter_by(
-        user_id=current_user.id,
-        test_id=test_id,
-        status='in_progress'
-    ).first()
-    if test_session:
-        test_session.status = 'completed'
-        test_session.completed_at = datetime.utcnow()
+    # Mettre à jour le score
+    if total_points > 0:
+        test_result.score = (earned_points / total_points) * 100
     
     db.session.commit()
     
-    flash(f'Test terminé! Score obtenu : {score_percentage:.1f}%')
+    flash('Test soumis avec succès!')
     return redirect(url_for('test.show_result', result_id=test_result.id))
-
 
 @bp.route('/result/<int:result_id>')
 @login_required
