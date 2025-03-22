@@ -6,7 +6,7 @@ app = Flask(__name__)
 
 # Configuration de la base de données
 DB_USER = os.environ.get('DB_USER', 'your_username')
-DB_PASSWORD = os.environ.get('DB_PASSWORD', 'your_password')
+DB_PASSWORD = os.environ.get('DB_PASSWORD', 'Q8Gu@29psApcnt8')
 DB_HOST = os.environ.get('DB_HOST', 'localhost')
 DB_PORT = os.environ.get('DB_PORT', '5432')
 DB_NAME = os.environ.get('DB_NAME', 'oxford_db')
