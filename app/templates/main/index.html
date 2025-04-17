@@ -2,70 +2,74 @@
 
 {% block title %}OXFORD INSTITUT - Centre d'Excellence en Langues{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stylemainindex.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
 <!-- Hero Section -->
 <section class="hero">
-    <div class="hero-content">
+    <div class="hero-overlay"></div>
+    <div class="container">
         <h1>OXFORD INSTITUT</h1>
         <p class="subtitle">Excellence et Innovation dans l'Apprentissage des Langues</p>
-        {% if not current_user.is_authenticated %}
-            <div class="cta-buttons">
-                <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Commencer votre parcours</a>
-                <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Se connecter</a>
-            </div>
-        {% endif %}
+        <div class="cta-buttons">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-light">Commencer votre parcours</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light">Se connecter</a>
+        </div>
     </div>
 </section>
+
 <!-- Image Gallery Section -->
-<section class="image-gallery">
+<section class="gallery">
     <div class="container">
         <h2>Notre Centre en Images</h2>
-        <div class="gallery-container">
+        <div class="gallery-grid">
             <div class="gallery-item">
-                <img src="{{ url_for('static', filename='images/screenshot1.png') }}" alt="Salle de classe moderne" 
-                     loading="lazy">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/TEST%20LEVEL%20A1.PNG-L2NDXLRK4yz76MVEoEJQmI3mZmA8S6.png" alt="Test de niveau A1">
                 <div class="image-overlay">
-                    <p>Salles de classe modernes</p>
+                    <p>Tests de niveau en petits groupes</p>
                 </div>
             </div>
             <div class="gallery-item">
-                <img src="{{ url_for('static', filename='images/screenshot2.png') }}" alt="Cours en petit groupe" 
-                     loading="lazy">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2033.JPG-KVkvAKjPdmKb6bA1ysdT7QWpmvrbcI.jpeg" alt="Nouveaux groupes le dimanche">
                 <div class="image-overlay">
-                    <p>Cours en petits groupes</p>
+                    <p>Nouveaux groupes chaque semaine</p>
                 </div>
             </div>
             <div class="gallery-item">
-                <img src="{{ url_for('static', filename='images/screenshot3.png') }}" alt="Laboratoire de langue" 
-                     loading="lazy">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_2029.JPG-gYndOm026x11ljXHWavPC1PnBP9gN7.jpeg" alt="Offre spéciale d'anglais">
                 <div class="image-overlay">
-                    <p>Laboratoire de langue</p>
+                    <p>Offres spéciales d'apprentissage</p>
                 </div>
             </div>
             <div class="gallery-item">
-                <img src="{{ url_for('static', filename='images/screenshot4.png') }}" alt="Espace détente" 
-                     loading="lazy">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1ff13348-f187-495d-93c6-8b6b3846e49c.JPG-21P6RxEHD1uNd0hufeG0TM8lHvF3lS.jpeg" alt="Cours de robotique pour enfants">
                 <div class="image-overlay">
-                    <p>Espaces de détente</p>
+                    <p>Cours de robotique pour enfants</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
+
 <!-- Quick Stats -->
 <section class="stats">
     <div class="container">
-        <div class="stat-item">
-            <h3>98%</h3>
-            <p>Taux de réussite</p>
-        </div>
-        <div class="stat-item">
-            <h3>1000+</h3>
-            <p>Étudiants certifiés</p>
-        </div>
-        <div class="stat-item">
-            <h3>15+</h3>
-            <p>Années d'expérience</p>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>98%</h3>
+                <p>Taux de réussite</p>
+            </div>
+            <div class="stat-item">
+                <h3>1000+</h3>
+                <p>Étudiants certifiés</p>
+            </div>
+            <div class="stat-item">
+                <h3>15+</h3>
+                <p>Années d'expérience</p>
+            </div>
         </div>
     </div>
 </section>
@@ -81,22 +85,46 @@
                     <span class="level-tag">Fondamental</span>
                 </div>
                 <ul class="level-details">
-                    <li>Communication basique quotidienne</li>
-                    <li>Vocabulaire essentiel</li>
-                    <li>Grammaire fondamentale</li>
-                    <li>Durée: 60 minutes</li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Communication basique quotidienne</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Vocabulaire essentiel</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Grammaire fondamentale</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Durée: 60 minutes</span>
+                    </li>
                 </ul>
             </div>
-            <div class="level-card">
+            <div class="level-card featured">
                 <div class="level-header">
                     <h3>Intermédiaire (B1)</h3>
-                    <span class="level-tag">Avancé</span>
+                    <span class="level-tag advanced">Avancé</span>
                 </div>
                 <ul class="level-details">
-                    <li>Expression courante fluide</li>
-                    <li>Vocabulaire professionnel</li>
-                    <li>Structures complexes</li>
-                    <li>Durée: 90 minutes</li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Expression courante fluide</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Vocabulaire professionnel</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Structures complexes</span>
+                    </li>
+                    <li>
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Durée: 90 minutes</span>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -109,19 +137,44 @@
         <h2>Pourquoi Nous Choisir ?</h2>
         <div class="features-grid">
             <div class="feature-card">
-                <i class="fas fa-certificate"></i>
+                <i class="fa-solid fa-certificate"></i>
                 <h3>Certification Officielle</h3>
                 <p>Certifications reconnues internationalement selon les standards CEFR</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-users"></i>
+                <i class="fa-solid fa-users"></i>
                 <h3>Professeurs Natifs</h3>
                 <p>Une équipe de professeurs qualifiés et expérimentés</p>
             </div>
             <div class="feature-card">
-                <i class="fas fa-laptop"></i>
+                <i class="fa-solid fa-laptop"></i>
                 <h3>Plateforme Moderne</h3>
                 <p>Tests en ligne adaptés à votre niveau et votre progression</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Offres Spéciales -->
+<section class="special-offers">
+    <div class="container">
+        <h2>Nos Offres Spéciales</h2>
+        <div class="offers-grid">
+            <div class="offer-card">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_0700.PNG-ZiSDKXpVrYxcSdRUMqL1WdvF1auOPq.png" alt="Offre spéciale anglais" class="offer-image">
+                <div class="offer-content">
+                    <h3>Anglais Intensif</h3>
+                    <p>6 mois complets d'apprentissage de l'anglais pour seulement 1000 Dhs</p>
+                    <a href="/" class="btn btn-primary">En savoir plus</a>
+                </div>
+            </div>
+            <div class="offer-card">
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/1ff13348-f187-495d-93c6-8b6b3846e49c.JPG-21P6RxEHD1uNd0hufeG0TM8lHvF3lS.jpeg" alt="Cours de robotique" class="offer-image">
+                <div class="offer-content">
+                    <h3>Robotique pour Enfants</h3>
+                    <p>Cours de robotique et programmation Scratch tous les dimanches - 300 Dhs</p>
+                    <a href="/" class="btn btn-primary">En savoir plus</a>
+                </div>
             </div>
         </div>
     </div>
@@ -137,10 +190,16 @@
                 <h3>Inscription</h3>
                 <p>Créez votre compte gratuitement</p>
             </div>
+            <div class="step-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
             <div class="step">
                 <div class="step-number">2</div>
                 <h3>Test de Niveau</h3>
                 <p>Évaluez votre niveau actuel</p>
+            </div>
+            <div class="step-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
             </div>
             <div class="step">
                 <div class="step-number">3</div>
@@ -156,11 +215,49 @@
     <div class="container">
         <h2>Prêt à commencer votre parcours ?</h2>
         <p>Rejoignez les milliers d'étudiants qui ont déjà fait confiance à OXFORD INSTITUT</p>
-        {% if not current_user.is_authenticated %}
-            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">S'inscrire Gratuitement</a>
+        {% if current_user.is_authenticated %}
+            {% if current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">Accéder au Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-outline-light">Mon Tableau de Bord</a>
+            {% endif %}
         {% else %}
-            <a href="{{ url_for('test.available_tests') }}" class="btn btn-primary">Voir les Tests Disponibles</a>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light">S'inscrire Gratuitement</a>
         {% endif %}
     </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Menu mobile toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const menuToggle = document.getElementById('menuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        if(menuToggle && mobileMenu) {
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('active');
+                
+                // Change icon based on menu state
+                const icon = menuToggle.querySelector('i');
+                if (mobileMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-xmark');
+                    menuToggle.setAttribute('aria-label', 'Fermer le menu');
+                } else {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                    menuToggle.setAttribute('aria-label', 'Ouvrir le menu');
+                }
+            });
+        }
+        
+        // Set current year in footer if the element exists
+        const currentYearElement = document.getElementById('currentYear');
+        if(currentYearElement) {
+            currentYearElement.textContent = new Date().getFullYear();
+        }
+    });
+</script>
 {% endblock %}

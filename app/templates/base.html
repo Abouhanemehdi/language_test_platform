@@ -3,15 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock %} - Plateforme de Tests</title>
+    <title>{% block title %}{% endblock %} - Oxford Institut</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
+    {% if request.endpoint == 'main.index' %}
+    <!-- Navigation personnalisée pour la page d'accueil uniquement -->
+    <header class="navbar">
+        <div class="container">
+            <a href="{{ url_for('main.index') }}" class="logo">
+                <img src="{{ url_for('static', filename='images/image.png') }}" alt="Oxford Language Center Logo" class="logo-image">
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="nav-desktop">
+                <a href="{{ url_for('main.index') }}" class="nav-link active">Accueil</a>
+                <a href="/cours" class="nav-link">Cours</a>
+                <a href="/tests" class="nav-link">Tests</a>
+                <a href="/a-propos" class="nav-link">À propos</a>
+                <a href="/contact" class="nav-link">Contact</a>
+            </nav>
+
+            <!-- Auth Buttons - Desktop -->
+            <div class="auth-buttons">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.role == 'admin' %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">Dashboard</a>
+                    {% else %}
+                        <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-outline">Mon compte</a>
+                    {% endif %}
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Déconnexion</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Se connecter</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary">S'inscrire</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile Menu Button -->
+            <button class="menu-toggle" id="menuToggle" aria-label="Ouvrir le menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+    <div class="container">
+        <a href="{{ url_for('main.index') }}" class="nav-link active">Accueil</a>
+        <a href="/cours" class="nav-link">Cours</a>
+        <a href="/tests" class="nav-link">Tests</a>
+        <a href="/a-propos" class="nav-link">À propos</a>
+        <a href="/contact" class="nav-link">Contact</a>
+        <div class="mobile-auth">
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-full">Dashboard</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-outline btn-full">Mon compte</a>
+                {% endif %}
+                <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-full">Déconnexion</a>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-full">Se connecter</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-full">S'inscrire</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+    </header>
+    {% else %}
+    <!-- Navigation standard pour toutes les autres pages -->
     <nav>
         <div class="nav-links">
             <a href="{{ url_for('main.index') }}">Accueil</a>
@@ -33,17 +96,65 @@
             {% endif %}
         </div>
     </nav>
+    {% endif %}
     
-    {% with messages = get_flashed_messages() %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            {% for message in messages %}
-                <div class="flash">{{ message }}</div>
-            {% endfor %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
         {% endif %}
     {% endwith %}
     
     <main>
         {% block content %}{% endblock %}
     </main>
+
+    {% if request.endpoint == 'main.index' %}
+    <!-- Footer uniquement pour la page d'accueil -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <div class="footer-logo">
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>OXFORD INSTITUT</span>
+                    </div>
+                    <p>Centre d'Excellence en Langues depuis plus de 15 ans.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h3>Liens Rapides</h3>
+                    <ul>
+                        <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
+                        <li><a href="/a-propos">À propos</a></li>
+                        <li><a href="/cours">Cours</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-contact">
+                    <h3>Contact</h3>
+                    <address>
+                        <p>123 Avenue des Langues</p>
+                        <p>75001 Paris, France</p>
+                        <p>Email: contact@oxford-institut.fr</p>
+                        <p>Tél: +33 1 23 45 67 89</p>
+                    </address>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; <span id="currentYear"></span> OXFORD INSTITUT. Tous droits réservés.</p>
+            </div>
+        </div>
+    </footer>
+    {% endif %}
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
