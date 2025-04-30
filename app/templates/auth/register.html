@@ -2,27 +2,56 @@
 
 {% block title %}Inscription{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stylemainindex.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-    <div class="auth-form">
-        <h1>Inscription</h1>
-        <form method="POST" action="{{ url_for('auth.register') }}">
-            <div class="form-group">
-                <label for="username">Nom d'utilisateur</label>
-                <input type="text" id="username" name="username" required>
+    <!-- Hero Section (plus petit que la page d'accueil) -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Inscription</h1>
+            <p class="subtitle">Créez votre compte pour accéder à nos services</p>
+        </div>
+    </section>
+
+    <!-- Formulaire d'inscription -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-form-container">
+                <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+                    <div class="form-group">
+                        <label for="username">Nom d'utilisateur</label>
+                        <input type="text" id="username" name="username" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Numéro de téléphone</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" required 
+                            placeholder="Ex: 06 12 34 56 78">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="city">Ville</label>
+                        <input type="text" id="city" name="city" class="form-control" required 
+                            placeholder="Ex: Casablanca">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg btn-full">S'inscrire</button>
+                </form>
+                <p class="auth-link">Déjà inscrit ? <a href="{{ url_for('auth.login') }}">Se connecter</a></p>
             </div>
-            
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <button type="submit">S'inscrire</button>
-        </form>
-        <p>Déjà inscrit ? <a href="{{ url_for('auth.login') }}">Se connecter</a></p>
-    </div>
+        </div>
+    </section>
 {% endblock %}

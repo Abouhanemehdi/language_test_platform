@@ -11,8 +11,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% if request.endpoint == 'main.index' %}
-    <!-- Navigation personnalisée pour la page d'accueil uniquement -->
+    <!-- Utiliser le même header sur toutes les pages -->
     <header class="navbar">
         <div class="container">
             <a href="{{ url_for('main.index') }}" class="logo">
@@ -21,11 +20,13 @@
 
             <!-- Desktop Navigation -->
             <nav class="nav-desktop">
-                <a href="{{ url_for('main.index') }}" class="nav-link active">Accueil</a>
-                <a href="/cours" class="nav-link">Cours</a>
-                <a href="/tests" class="nav-link">Tests</a>
-                <a href="/a-propos" class="nav-link">À propos</a>
-                <a href="/contact" class="nav-link">Contact</a>
+                {% if not request.endpoint.startswith('admin.') %}
+                <a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Accueil</a>
+                <a href="{{ url_for('main.cours') }}" class="nav-link {% if request.endpoint == 'main.cours' %}active{% endif %}">Cours</a>
+                <a href="{{ url_for('main.tests') }}" class="nav-link {% if request.endpoint == 'main.tests' %}active{% endif %}">Tests</a>
+                <a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">À propos</a>
+                <a href="{{ url_for('main.contact') }}" class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}">Contact</a>
+                {% endif %}
             </nav>
 
             <!-- Auth Buttons - Desktop -->
@@ -34,7 +35,7 @@
                     {% if current_user.role == 'admin' %}
                         <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">Dashboard</a>
                     {% else %}
-                        <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-outline">Mon compte</a>
+                        <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline">Mon compte</a>
                     {% endif %}
                     <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">Déconnexion</a>
                 {% else %}
@@ -50,54 +51,41 @@
         </div>
 
         <!-- Mobile Menu -->
-<div class="mobile-menu" id="mobileMenu">
-    <div class="container">
-        <a href="{{ url_for('main.index') }}" class="nav-link active">Accueil</a>
-        <a href="/cours" class="nav-link">Cours</a>
-        <a href="/tests" class="nav-link">Tests</a>
-        <a href="/a-propos" class="nav-link">À propos</a>
-        <a href="/contact" class="nav-link">Contact</a>
-        <div class="mobile-auth">
-            {% if current_user.is_authenticated %}
-                {% if current_user.role == 'admin' %}
-                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline btn-full">Dashboard</a>
-                {% else %}
-                    <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-outline btn-full">Mon compte</a>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="container">
+                {% if not request.endpoint.startswith('admin.') %}
+                <a href="{{ url_for('main.index') }}" class="nav-link {% if request.endpoint == 'main.index' %}active{% endif %}">Accueil</a>
+                <a href="{{ url_for('main.cours') }}" class="nav-link {% if request.endpoint == 'main.cours' %}active{% endif %}">Cours</a>
+                <a href="{{ url_for('main.tests') }}" class="nav-link {% if request.endpoint == 'main.tests' %}active{% endif %}">Tests</a>
+                <a href="{{ url_for('main.about') }}" class="nav-link {% if request.endpoint == 'main.about' %}active{% endif %}">À propos</a>
+                <a href="{{ url_for('main.contact') }}" class="nav-link {% if request.endpoint == 'main.contact' %}active{% endif %}">Contact</a>
                 {% endif %}
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-full">Déconnexion</a>
-            {% else %}
-                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-full">Se connecter</a>
-                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-full">S'inscrire</a>
-            {% endif %}
+                
+                {% if current_user.is_authenticated and current_user.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if 'admin.' in request.endpoint %}active{% endif %}">Dashboard</a>
+                <a href="{{ url_for('admin.manage_tests') }}" class="nav-link {% if request.endpoint == 'admin.manage_tests' %}active{% endif %}">Gestion Tests</a>
+                <a href="{{ url_for('admin.pending_results') }}" class="nav-link {% if request.endpoint == 'admin.pending_results' %}active{% endif %}">Résultats en attente</a>
+                <a href="{{ url_for('admin.manage_users') }}" class="nav-link {% if request.endpoint == 'admin.manage_users' %}active{% endif %}">Gestion Utilisateurs</a>
+                <a href="{{ url_for('admin.validated_results') }}" class="nav-link {% if request.endpoint == 'admin.validated_results' %}active{% endif %}">Résultats validés</a>
+                {% endif %}
+                
+                <div class="mobile-auth">
+                    {% if current_user.is_authenticated %}
+                        {% if current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary btn-full">Dashboard</a>
+                        {% else %}
+                            <a href="{{ url_for('dashboard.index') }}" class="btn btn-primary btn-full">Mon compte</a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-full">Déconnexion</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-full">Se connecter</a>
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-full">S'inscrire</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-    </div>
-</div>
     </header>
-    {% else %}
-    <!-- Navigation standard pour toutes les autres pages -->
-    <nav>
-        <div class="nav-links">
-            <a href="{{ url_for('main.index') }}">Accueil</a>
-            {% if current_user.is_authenticated %}
-                {% if current_user.role == 'admin' %}
-                    <a href="{{ url_for('admin.dashboard') }}">Dashboard</a>
-                    <a href="{{ url_for('admin.manage_tests') }}" class="nav-link">Gestion Tests</a>
-                    <a href="{{ url_for('admin.pending_results') }}" class="nav-link">Résultats en attente</a>
-                    <a href="{{ url_for('admin.manage_users') }}" class="nav-link">Gestion Utilisateurs</a>
-                    <a href="{{ url_for('admin.validated_results') }}" class="nav-link">Résultats validés</a>
-                {% else %}
-                    <a href="{{ url_for('dashboard.user_dashboard') }}" class="nav-link">Mon Tableau de Bord</a>
-                {% endif %}
-                <span>{{ current_user.username }}</span>
-                <a href="{{ url_for('auth.logout') }}">Déconnexion</a>
-            {% else %}
-                <a href="{{ url_for('auth.login') }}">Connexion</a>
-                <a href="{{ url_for('auth.register') }}">Inscription</a>
-            {% endif %}
-        </div>
-    </nav>
-    {% endif %}
-    
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="flash-messages">
@@ -112,8 +100,7 @@
         {% block content %}{% endblock %}
     </main>
 
-    {% if request.endpoint == 'main.index' %}
-    <!-- Footer uniquement pour la page d'accueil -->
+    <!-- Footer unifié pour toutes les pages -->
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
@@ -133,18 +120,17 @@
                     <h3>Liens Rapides</h3>
                     <ul>
                         <li><a href="{{ url_for('main.index') }}">Accueil</a></li>
-                        <li><a href="/a-propos">À propos</a></li>
-                        <li><a href="/cours">Cours</a></li>
-                        <li><a href="/contact">Contact</a></li>
+                        <li><a href="{{ url_for('main.about') }}">À propos</a></li>
+                        <li><a href="{{ url_for('main.cours') }}">Cours</a></li>
+                        <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-contact">
                     <h3>Contact</h3>
                     <address>
-                        <p>123 Avenue des Langues</p>
-                        <p>75001 Paris, France</p>
-                        <p>Email: contact@oxford-institut.fr</p>
-                        <p>Tél: +33 1 23 45 67 89</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Residence EL AZMI avenue mohamed 5<br>lot Lefroughi salé hay karima, Salé</p>
+                        <p><i class="fas fa-envelope"></i> Oxford1be@gmail.com</p>
+                        <p><i class="fas fa-phone"></i> 06 67 98 04 68 / 07 00 33 75 55</p>
                     </address>
                 </div>
             </div>
@@ -153,8 +139,36 @@
             </div>
         </div>
     </footer>
-    {% endif %}
     
+    <script>
+        // Année courante pour le copyright
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // Menu mobile toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const menuToggle = document.getElementById('menuToggle');
+            const mobileMenu = document.getElementById('mobileMenu');
+            
+            if (menuToggle && mobileMenu) {
+                menuToggle.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('active');
+                    
+                    // Change icon based on menu state
+                    const icon = menuToggle.querySelector('i');
+                    if (mobileMenu.classList.contains('active')) {
+                        icon.classList.remove('fa-bars');
+                        icon.classList.add('fa-xmark');
+                        menuToggle.setAttribute('aria-label', 'Fermer le menu');
+                    } else {
+                        icon.classList.remove('fa-xmark');
+                        icon.classList.add('fa-bars');
+                        menuToggle.setAttribute('aria-label', 'Ouvrir le menu');
+                    }
+                });
+            }
+        });
+    </script>
+
     {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -1,49 +1,296 @@
-{% extends "base.html" %}
-
-{% block title %}Résultats en attente{% endblock %}
+{% extends "admin/base_admin.html" %}
 
 {% block content %}
-<div class="admin-container">
-    <div class="admin-header">
+<div class="content-section">
+    <div class="section-header">
         <h1>Résultats en attente</h1>
-        <a href="{{ url_for('admin.validated_results') }}" class="btn btn-primary">Voir les résultats validés</a>
+        <div class="stats-overview">
+            <div class="stat-card">
+                <i class="fas fa-clock"></i>
+                <div class="stat-info">
+                    <span class="stat-value">{{ pending_count }}</span>
+                    <span class="stat-label">Résultats en attente</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-file-alt"></i>
+                <div class="stat-info">
+                    <span class="stat-value">{{ unique_tests }}</span>
+                    <span class="stat-label">Tests différents</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-hourglass-half"></i>
+                <div class="stat-info">
+                    <span class="stat-value">{{ avg_wait_time }}h</span>
+                    <span class="stat-label">Temps d'attente moyen</span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="admin-section">
-        {% if results %}
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Utilisateur</th>
-                        <th>Test</th>
-                        <th>Score</th>
-                        <th>Niveau</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in results %}
-                    <tr>
-                        <td>{{ result.user.username }}</td>
-                        <td>{{ result.test.title }}</td>
-                        <td>{{ "%.1f"|format(result.score) }}%</td>
-                        <td>{{ result.level_achieved }}</td>
-                        <td>{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                        <td class="actions">
-                            <a href="{{ url_for('admin.view_result_detail', result_id=result.id) }}" 
-                                class="btn btn-sm btn-info">Voir détails</a>
-                            <form method="POST" action="{{ url_for('admin.validate_result', result_id=result.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-success">Valider</button>
-                            </form>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    <div class="filters-section">
+        <div class="filter-group">
+            <label for="test-filter">Filtrer par test :</label>
+            <select id="test-filter" class="form-control">
+                <option value="">Tous les tests</option>
+                {% for test in tests %}
+                <option value="{{ test.id }}">{{ test.title }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="filter-group">
+            <label for="date-filter">Filtrer par date :</label>
+            <select id="date-filter" class="form-control">
+                <option value="all">Toutes les dates</option>
+                <option value="today">Aujourd'hui</option>
+                <option value="week">Cette semaine</option>
+                <option value="month">Ce mois</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="results-list">
+        {% for result in pending_results %}
+        <div class="result-card" data-test-id="{{ result.test.id }}">
+            <div class="result-info">
+                <div class="user-info">
+                    <i class="fas fa-user"></i>
+                    <span>{{ result.user.username }}</span>
+                </div>
+                <div class="test-info">
+                    <i class="fas fa-file-alt"></i>
+                    <span>{{ result.test.title }}</span>
+                </div>
+                <div class="completion-info">
+                    <i class="fas fa-clock"></i>
+                    <span>Complété le {{ result.completed_at.strftime('%d/%m/%Y à %H:%M') }}</span>
+                </div>
+            </div>
+            <div class="result-actions">
+                <a href="{{ url_for('admin.result_detail', result_id=result.id) }}" class="btn-view">
+                    <i class="fas fa-eye"></i> Voir le détail
+                </a>
+                <a href="{{ url_for('admin.validate_result', result_id=result.id) }}" class="btn-validate">
+                    <i class="fas fa-check"></i> Valider
+                </a>
+                <a href="{{ url_for('admin.reject_result', result_id=result.id) }}" class="btn-reject">
+                    <i class="fas fa-times"></i> Rejeter
+                </a>
+            </div>
+        </div>
         {% else %}
-            <p class="empty-state">Aucun résultat en attente de validation.</p>
-        {% endif %}
+        <div class="empty-state">
+            <i class="fas fa-check-circle"></i>
+            <p>Aucun résultat en attente de validation</p>
+        </div>
+        {% endfor %}
     </div>
 </div>
+
+<style>
+.content-section {
+    padding: 2rem;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: #3498db;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+}
+
+.filters-section {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dce4ec;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.results-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.result-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.result-info {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.user-info, .test-info, .completion-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.result-info i {
+    color: #7f8c8d;
+}
+
+.result-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-view, .btn-validate, .btn-reject {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.btn-view {
+    background: #3498db;
+    color: white;
+}
+
+.btn-validate {
+    background: #2ecc71;
+    color: white;
+}
+
+.btn-reject {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-view:hover { background: #2980b9; }
+.btn-validate:hover { background: #27ae60; }
+.btn-reject:hover { background: #c0392b; }
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #2ecc71;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #7f8c8d;
+    font-size: 1.125rem;
+}
+
+@media (max-width: 768px) {
+    .result-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .result-info {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .result-actions {
+        justify-content: flex-start;
+        margin-top: 1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testFilter = document.getElementById('test-filter');
+    const dateFilter = document.getElementById('date-filter');
+    const resultCards = document.querySelectorAll('.result-card');
+    
+    function filterResults() {
+        const selectedTestId = testFilter.value;
+        const selectedDate = dateFilter.value;
+        
+        resultCards.forEach(card => {
+            const testId = card.dataset.testId;
+            let showCard = true;
+            
+            if (selectedTestId && testId !== selectedTestId) {
+                showCard = false;
+            }
+            
+            // Implement date filtering logic here
+            
+            card.style.display = showCard ? 'flex' : 'none';
+        });
+    }
+    
+    testFilter.addEventListener('change', filterResults);
+    dateFilter.addEventListener('change', filterResults);
+});
+</script>
 {% endblock %}

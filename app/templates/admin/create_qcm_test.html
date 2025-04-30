@@ -1,0 +1,463 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Créer un test QCM{% endblock %}
+
+{% block content %}
+<div class="content-section">
+    <form method="POST" action="{{ url_for('admin.create_qcm_test') }}" id="qcmTestForm">
+        <!-- Informations générales -->
+        <div class="form-section">
+            <div class="section-header">
+                <h2 class="section-title">Informations générales</h2>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="title">Titre du test</label>
+                    <input type="text" id="title" name="title" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="level">Niveau</label>
+                    <select id="level" name="level" class="form-control" required>
+                        <option value="A1">A1 - Débutant</option>
+                        <option value="A2">A2 - Élémentaire</option>
+                        <option value="B1">B1 - Intermédiaire</option>
+                        <option value="B2">B2 - Intermédiaire avancé</option>
+                        <option value="C1">C1 - Avancé</option>
+                        <option value="C2">C2 - Maîtrise</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Durée (minutes)</label>
+                    <input type="number" id="duration" name="duration" class="form-control" required min="10" max="180">
+                    <small class="form-text">Durée entre 10 et 180 minutes</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="user_role">Public cible</label>
+                    <select id="user_role" name="user_role" class="form-control" required>
+                        <option value="prospect">Prospect</option>
+                        <option value="client">Client</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description">Description du test</label>
+                <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+            </div>
+        </div>
+
+        <!-- Questions -->
+        <div class="form-section">
+            <div class="section-header">
+                <h2 class="section-title">Questions</h2>
+                <button type="button" class="btn-secondary" id="add-question">
+                    <i class="fas fa-plus"></i> Ajouter une question
+                </button>
+            </div>
+            <div id="questions-container" class="questions-list">
+                <!-- Les questions seront ajoutées ici dynamiquement -->
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.select_test_type') }}" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Créer le test
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Template pour une question -->
+<template id="question-template">
+    <div class="question-card">
+        <div class="question-card-header">
+            <h3>Question #<span class="question-number"></span></h3>
+            <button type="button" class="btn-icon delete" onclick="removeQuestion(this)" title="Supprimer la question">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="question-card-content">
+            <div class="form-group">
+                <label>Question</label>
+                <textarea class="form-control question-text" name="questions[0][text]" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Points</label>
+                <input type="number" class="form-control question-points" name="questions[0][points]" value="1" min="1" required>
+            </div>
+            <div class="answers-container">
+                <div class="subsection-header">
+                    <h4>Réponses</h4>
+                    <button type="button" class="btn-secondary add-answer">
+                        <i class="fas fa-plus"></i> Ajouter une réponse
+                    </button>
+                </div>
+                <div class="answers-list">
+                    <!-- Les réponses seront ajoutées ici -->
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Template pour une réponse -->
+<template id="answer-template">
+    <div class="answer-item">
+        <div class="answer-input-group">
+            <input type="text" class="form-control answer-text" name="questions[0][answers][0][text]" placeholder="Réponse" required>
+            <label class="answer-correct">
+                <input type="radio" name="questions[0][correct_answer]" value="0" required>
+                <span class="checkmark"></span>
+                Correcte
+            </label>
+            <button type="button" class="btn-icon delete" onclick="removeAnswer(this)" title="Supprimer la réponse">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </div>
+</template>
+
+<style>
+.content-section {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.question-card {
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.question-card-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.question-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.question-card-content {
+    padding: 1.5rem;
+}
+
+.answers-container {
+    margin-top: 1rem;
+}
+
+.subsection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.subsection-header h4 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.answer-item {
+    margin-bottom: 0.75rem;
+}
+
+.answer-input-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.answer-correct {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.answer-correct input[type="radio"] {
+    margin: 0;
+}
+
+.btn-icon {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-icon.delete {
+    color: #e74c3c;
+    background: #fee;
+}
+
+.btn-icon.delete:hover {
+    background: #fdd;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+    background-color: #e9ecef;
+    color: #2c3e50;
+    text-decoration: none;
+}
+
+.form-text {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const questionsContainer = document.getElementById('questions-container');
+    const addQuestionBtn = document.getElementById('add-question');
+    const questionTemplate = document.getElementById('question-template');
+    const answerTemplate = document.getElementById('answer-template');
+    let questionCount = 0;
+
+    // Ajouter une question
+    addQuestionBtn.addEventListener('click', function() {
+        const questionNode = questionTemplate.content.cloneNode(true);
+        const questionCard = questionNode.querySelector('.question-card');
+        
+        // Mettre à jour le numéro de la question
+        questionCard.querySelector('.question-number').textContent = questionCount + 1;
+        
+        // Mettre à jour les noms des champs
+        updateFieldNames(questionCard, questionCount);
+        
+        // Ajouter le gestionnaire pour le bouton d'ajout de réponse
+        questionCard.querySelector('.add-answer').addEventListener('click', function() {
+            addAnswer(questionCard);
+        });
+        
+        questionsContainer.appendChild(questionCard);
+        
+        // Ajouter deux réponses par défaut
+        addAnswer(questionCard);
+        addAnswer(questionCard);
+        
+        questionCount++;
+    });
+
+    // Ajouter une réponse
+    function addAnswer(questionCard) {
+        const answersList = questionCard.querySelector('.answers-list');
+        const answerNode = answerTemplate.content.cloneNode(true);
+        const answerItem = answerNode.querySelector('.answer-item');
+        
+        // Mettre à jour les noms des champs
+        const questionIndex = Array.from(questionsContainer.children).indexOf(questionCard);
+        const answerIndex = answersList.children.length;
+        
+        const answerText = answerItem.querySelector('.answer-text');
+        answerText.name = `questions[${questionIndex}][answers][${answerIndex}][text]`;
+        
+        const radioButton = answerItem.querySelector('input[type="radio"]');
+        radioButton.name = `questions[${questionIndex}][correct_answer]`;
+        radioButton.value = answerIndex;
+        
+        answersList.appendChild(answerItem);
+        
+        // Si c'est la première réponse de la question, la sélectionner par défaut
+        if (answerIndex === 0) {
+            radioButton.checked = true;
+        }
+    }
+
+    // Mettre à jour les noms des champs d'une question
+    function updateFieldNames(questionCard, index) {
+        questionCard.querySelector('.question-text').name = `questions[${index}][text]`;
+        questionCard.querySelector('.question-points').name = `questions[${index}][points]`;
+    }
+
+    // Supprimer une question
+    window.removeQuestion = function(button) {
+        const questionCard = button.closest('.question-card');
+        questionCard.remove();
+        updateQuestionNumbers();
+    };
+
+    // Supprimer une réponse
+    window.removeAnswer = function(button) {
+        const answerItem = button.closest('.answer-item');
+        const answersList = answerItem.parentElement;
+        const questionCard = answersList.closest('.question-card');
+        
+        // Empêcher la suppression s'il ne reste que deux réponses
+        if (answersList.children.length <= 2) {
+            alert('Une question doit avoir au moins deux réponses.');
+            return;
+        }
+        
+        // Si on supprime la réponse correcte, sélectionner la première réponse restante
+        const radioButton = answerItem.querySelector('input[type="radio"]');
+        if (radioButton.checked) {
+            const firstRadio = answersList.querySelector('input[type="radio"]');
+            if (firstRadio) {
+                firstRadio.checked = true;
+            }
+        }
+        
+        answerItem.remove();
+        updateAnswerNames(questionCard);
+    };
+
+    // Mettre à jour les numéros des questions
+    function updateQuestionNumbers() {
+        const questions = questionsContainer.querySelectorAll('.question-card');
+        questions.forEach((question, index) => {
+            question.querySelector('.question-number').textContent = index + 1;
+            updateFieldNames(question, index);
+            updateAnswerNames(question);
+        });
+        questionCount = questions.length;
+    }
+
+    // Mettre à jour les noms des champs des réponses
+    function updateAnswerNames(questionCard) {
+        const questionIndex = Array.from(questionsContainer.children).indexOf(questionCard);
+        const answers = questionCard.querySelectorAll('.answer-item');
+        
+        answers.forEach((answer, answerIndex) => {
+            const answerText = answer.querySelector('.answer-text');
+            answerText.name = `questions[${questionIndex}][answers][${answerIndex}][text]`;
+            
+            const radioButton = answer.querySelector('input[type="radio"]');
+            radioButton.name = `questions[${questionIndex}][correct_answer]`;
+            radioButton.value = answerIndex;
+        });
+    }
+
+    // Validation du formulaire
+    document.getElementById('qcmTestForm').addEventListener('submit', function(e) {
+        const questions = questionsContainer.querySelectorAll('.question-card');
+        
+        if (questions.length === 0) {
+            e.preventDefault();
+            alert('Veuillez ajouter au moins une question au test.');
+            return;
+        }
+        
+        let hasError = false;
+        questions.forEach((question, index) => {
+            const answers = question.querySelectorAll('.answer-item');
+            if (answers.length < 2) {
+                hasError = true;
+                alert(`La question ${index + 1} doit avoir au moins deux réponses possibles.`);
+            }
+            
+            const hasCorrectAnswer = question.querySelector('input[type="radio"]:checked');
+            if (!hasCorrectAnswer) {
+                hasError = true;
+                alert(`Veuillez sélectionner une réponse correcte pour la question ${index + 1}.`);
+            }
+        });
+        
+        if (hasError) {
+            e.preventDefault();
+        }
+    });
+
+    // Ajouter une première question au chargement
+    addQuestionBtn.click();
+});
+</script>
+{% endblock %} 

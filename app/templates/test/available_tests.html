@@ -1,35 +1,350 @@
-{% extends "base.html" %}
+{% extends "layout_client.html" %}
 
 {% block title %}Tests Disponibles{% endblock %}
 
 {% block content %}
-<div class="test-container">
-    <div class="test-header">
-        <h1>Tests de niveau disponibles</h1>
+<div class="admin-container">
+    <div class="page-header">
+        <div class="title-section">
+            <h1>Tests de niveau disponibles</h1>
+            <div class="filters">
+                <div class="filter-group">
+                    <select class="filter-select" id="levelFilter">
+                        <option value="">Tous les niveaux</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                        <option value="C2">C2</option>
+                    </select>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un test...">
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="tests-list">
+    <div class="content-section">
         {% if tests %}
+        <div class="tests-grid">
             {% for test in tests %}
-            <div class="test-card">
-                <h3>{{ test.title }}</h3>
-                <div class="test-details">
-                    <p><strong>Niveau :</strong> {{ test.level }}</p>
-                    <p><strong>Durée :</strong> {{ test.duration }} minutes</p>
+            <div class="test-card" data-level="{{ test.level }}">
+                <div class="test-header">
+                    <h3>{{ test.title }}</h3>
+                    <span class="level-badge">{{ test.level }}</span>
+                </div>
+                <div class="test-content">
                     {% if test.description %}
-                        <p class="description">{{ test.description }}</p>
+                    <p>{{ test.description }}</p>
                     {% endif %}
+                    <div class="test-meta">
+                        <span><i class="fas fa-clock"></i> {{ test.duration }} minutes</span>
+                        <span><i class="fas fa-tasks"></i> {{ test.questions|length }} questions</span>
+                    </div>
                 </div>
                 <div class="test-actions">
-                    <a href="{{ url_for('test.take_test', test_id=test.id) }}" class="btn btn-primary">
-                        Commencer le test
+                    {% if test|has_taken_test(current_user) %}
+                    <span class="action-button disabled">
+                        <i class="fas fa-check"></i> Test déjà passé
+                    </span>
+                    {% elif test.is_free or current_user.role == 'client' or current_user.role == 'admin' %}
+                    <a href="{{ url_for('test.take_test', test_id=test.id) }}" class="action-button primary">
+                        <i class="fas fa-play"></i> Commencer le test
                     </a>
+                    {% else %}
+                    <a href="{{ url_for('main.pricing') }}" class="action-button secondary">
+                        <i class="fas fa-lock"></i> Version Premium
+                    </a>
+                    {% endif %}
                 </div>
             </div>
             {% endfor %}
+        </div>
         {% else %}
-            <p class="empty-state">Aucun test n'est disponible pour le moment.</p>
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <p>Aucun test n'est disponible pour le moment.</p>
+            <p>Revenez plus tard ou contactez-nous pour plus d'informations.</p>
+        </div>
         {% endif %}
     </div>
 </div>
+
+<style>
+/* Styles pour la grille de tests */
+.tests-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Styles pour les cartes de test */
+.test-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.test-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.test-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.test-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.test-content {
+    padding: 1.5rem;
+}
+
+.test-content p {
+    margin: 0 0 1rem 0;
+    color: #666;
+    line-height: 1.5;
+}
+
+.test-meta {
+    display: flex;
+    gap: 1.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.test-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.test-meta i {
+    color: var(--primary-color);
+}
+
+.test-actions {
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Styles pour les badges */
+.level-badge {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+/* Styles pour les filtres */
+.filters {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-select {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: white;
+    min-width: 150px;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box i {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.search-input {
+    padding: 0.5rem 1rem 0.5rem 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    width: 250px;
+}
+
+/* État vide */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: var(--border-color);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .title-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .filters {
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+    }
+
+    .filter-group, .search-box {
+        width: 100%;
+    }
+
+    .filter-select, .search-input {
+        width: 100%;
+        max-width: none;
+    }
+
+    .tests-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .test-card {
+        margin-bottom: 1rem;
+    }
+
+    .test-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .test-actions {
+        padding: 1rem;
+    }
+
+    .action-button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Ajustements pour les très petits écrans */
+@media (max-width: 375px) {
+    .test-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .level-badge {
+        align-self: flex-start;
+    }
+
+    .test-content {
+        padding: 1rem;
+    }
+
+    .test-meta span {
+        font-size: 0.8rem;
+    }
+}
+
+/* Amélioration de l'accessibilité */
+@media (hover: none) {
+    .test-card:hover {
+        transform: none;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+}
+
+/* Support du mode sombre du système */
+@media (prefers-color-scheme: dark) {
+    .test-card {
+        background-color: #2d2d2d;
+        border-color: #404040;
+    }
+
+    .test-header h3 {
+        color: #ffffff;
+    }
+
+    .test-content p {
+        color: #cccccc;
+    }
+
+    .test-meta {
+        color: #a0a0a0;
+    }
+}
+
+.action-button.disabled {
+    background-color: #e0e0e0;
+    color: #666;
+    cursor: not-allowed;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const levelFilter = document.getElementById('levelFilter');
+    const searchInput = document.getElementById('searchInput');
+    const testCards = document.querySelectorAll('.test-card');
+
+    function filterTests() {
+        const selectedLevel = levelFilter.value.toLowerCase();
+        const searchTerm = searchInput.value.toLowerCase();
+
+        testCards.forEach(card => {
+            const level = card.dataset.level.toLowerCase();
+            const title = card.querySelector('h3').textContent.toLowerCase();
+            const description = card.querySelector('p')?.textContent.toLowerCase() || '';
+
+            const matchesLevel = !selectedLevel || level === selectedLevel;
+            const matchesSearch = !searchTerm || 
+                title.includes(searchTerm) || 
+                description.includes(searchTerm);
+
+            card.style.display = matchesLevel && matchesSearch ? 'block' : 'none';
+        });
+    }
+
+    if (levelFilter && searchInput) {
+        levelFilter.addEventListener('change', filterTests);
+        searchInput.addEventListener('input', filterTests);
+    }
+});
+</script>
 {% endblock %}

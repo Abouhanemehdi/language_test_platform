@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}À propos{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stylemainindex.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section (plus petit que la page d'accueil) -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>À propos d'Oxford Institut</h1>
+            <p class="subtitle">Centre d'Excellence en Langues depuis plus de 15 ans</p>
+        </div>
+    </section>
+
+    <!-- Notre histoire -->
+    <section class="about-history">
+        <div class="container">
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="OXFORD INSTITUT bâtiment">
+                </div>
+                <div class="about-text">
+                    <h2>Notre Histoire</h2>
+                    <p>Fondé il y a plus de 15 ans, OXFORD INSTITUT est né de la passion pour les langues et l'éducation de qualité. Ce qui a commencé comme un petit centre de langues avec quelques salles de classe s'est transformé en une institution reconnue pour l'excellence de son enseignement.</p>
+                    <p>Au fil des années, nous avons formé plus de 10 000 étudiants et développé des méthodes d'enseignement innovantes qui ont fait leurs preuves. Notre engagement envers la qualité et la réussite de nos étudiants reste au cœur de notre mission.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notre mission -->
+    <section class="about-mission">
+        <div class="container">
+            <div class="mission-content">
+                <div class="mission-text">
+                    <h2>Notre Mission</h2>
+                    <p>Chez OXFORD INSTITUT, notre mission est de fournir un enseignement linguistique de haute qualité qui permet à nos étudiants de communiquer efficacement dans un monde globalisé. Nous croyons que l'apprentissage d'une langue est bien plus que la maîtrise de la grammaire et du vocabulaire - c'est une porte ouverte sur une nouvelle culture et de nouvelles opportunités.</p>
+                    <blockquote>
+                        "Notre objectif est de transformer l'apprentissage des langues en une expérience enrichissante qui prépare nos étudiants à réussir dans leurs parcours académiques et professionnels."
+                    </blockquote>
+                </div>
+                <div class="mission-image">
+                    <img src="https://images.unsplash.com/photo-1577896851231-70ef18881754?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Salle de classe OXFORD INSTITUT">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nos valeurs -->
+    <section class="about-values">
+        <div class="container">
+            <h2>Nos Valeurs</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Excellence</h3>
+                    <p>Nous visons l'excellence dans tous les aspects de notre enseignement et de nos services.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Inclusion</h3>
+                    <p>Nous accueillons des étudiants de tous horizons et adaptons notre enseignement à leurs besoins.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <h3>Innovation</h3>
+                    <p>Nous intégrons constamment de nouvelles méthodes et technologies pour améliorer l'apprentissage.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h3>Engagement</h3>
+                    <p>Nous nous engageons pleinement dans la réussite de chaque étudiant.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Notre équipe -->
+    <section class="about-team">
+        <div class="container">
+            <h2>Notre Équipe Pédagogique</h2>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Professeur">
+                    </div>
+                    <div class="member-info">
+                        <h3>Sarah Johnson</h3>
+                        <p class="member-role">Directrice Pédagogique</p>
+                        <p>Diplômée de l'Université d'Oxford avec plus de 15 ans d'expérience dans l'enseignement de l'anglais.</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Professeur">
+                    </div>
+                    <div class="member-info">
+                        <h3>Jean Dupont</h3>
+                        <p class="member-role">Professeur de Français</p>
+                        <p>Spécialiste en français langue étrangère avec une approche communicative innovante.</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Professeur">
+                    </div>
+                    <div class="member-info">
+                        <h3>Carlos Rodriguez</h3>
+                        <p class="member-role">Professeur d'Espagnol</p>
+                        <p>Natif d'Espagne avec une passion pour l'enseignement de la langue et de la culture espagnoles.</p>
+                    </div>
+                </div>
+                <div class="team-member">
+                    <div class="member-image">
+                        <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Professeur">
+                    </div>
+                    <div class="member-info">
+                        <h3>Anna Schmidt</h3>
+                        <p class="member-role">Professeure d'Allemand</p>
+                        <p>Experte en pédagogie moderne pour l'enseignement de l'allemand à tous les niveaux.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Témoignages -->
+    <section class="testimonials">
+        <div class="container">
+            <h2>Ce que disent nos étudiants</h2>
+            <div class="testimonials-slider">
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"Grâce à OXFORD INSTITUT, j'ai pu atteindre le niveau B2 en anglais et obtenir mon poste de rêve dans une entreprise internationale. Les professeurs sont exceptionnels et la méthode d'enseignement est très efficace."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Étudiant">
+                        <div>
+                            <h4>Karim Benali</h4>
+                            <p>Étudiant en Anglais des Affaires</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"J'ai inscrit mes deux enfants aux cours d'anglais pour enfants et ils adorent y aller chaque semaine. L'approche ludique et interactive leur a permis d'apprendre rapidement tout en s'amusant."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Parent">
+                        <div>
+                            <h4>Fatima Ouazzani</h4>
+                            <p>Parent d'élèves</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial">
+                    <div class="testimonial-content">
+                        <p>"La certification que j'ai obtenue à OXFORD INSTITUT m'a ouvert les portes de plusieurs universités européennes. Je recommande vivement leurs cours de préparation aux examens."</p>
+                    </div>
+                    <div class="testimonial-author">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Étudiant">
+                        <div>
+                            <h4>Youssef El Amrani</h4>
+                            <p>Étudiant en Master à l'étranger</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Nos partenaires -->
+    <section class="partners">
+        <div class="container">
+            <h2>Nos Partenaires</h2>
+            <div class="partners-grid">
+                <div class="partner">
+                    <img src="https://via.placeholder.com/200x100?text=Partenaire+1" alt="Partenaire">
+                </div>
+                <div class="partner">
+                    <img src="https://via.placeholder.com/200x100?text=Partenaire+2" alt="Partenaire">
+                </div>
+                <div class="partner">
+                    <img src="https://via.placeholder.com/200x100?text=Partenaire+3" alt="Partenaire">
+                </div>
+                <div class="partner">
+                    <img src="https://via.placeholder.com/200x100?text=Partenaire+4" alt="Partenaire">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <h2>Rejoignez la communauté OXFORD INSTITUT</h2>
+            <p>Découvrez nos cours et commencez votre parcours linguistique dès aujourd'hui.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('main.cours') }}" class="btn btn-primary btn-lg">Voir nos cours</a>
+                <a href="{{ url_for('main.contact') }}" class="btn btn-outline btn-lg">Nous contacter</a>
+            </div>
+        </div>
+    </section>
+{% endblock %}

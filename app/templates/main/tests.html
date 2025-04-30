@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Tests{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stylemainindex.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section (plus petit que la page d'accueil) -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Nos Tests de Niveau</h1>
+            <p class="subtitle">Évaluez votre niveau de langue avec nos tests certifiés</p>
+        </div>
+    </section>
+
+    <!-- Introduction aux tests -->
+    <section class="tests-intro">
+        <div class="container">
+            <div class="intro-content">
+                <div class="intro-text">
+                    <h2>Pourquoi passer un test de niveau ?</h2>
+                    <p>Les tests de niveau sont essentiels pour évaluer vos compétences linguistiques actuelles et vous orienter vers le cours le plus adapté à votre profil. Chez OXFORD INSTITUT, nous proposons des tests standardisés qui évaluent les quatre compétences fondamentales : compréhension orale, expression orale, compréhension écrite et expression écrite.</p>
+                    <p>Nos certifications sont reconnues internationalement et peuvent vous aider dans votre parcours académique ou professionnel.</p>
+                </div>
+                <div class="intro-image">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Test de niveau">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Types de tests -->
+    <section class="test-types">
+        <div class="container">
+            <h2>Nos Tests Disponibles</h2>
+            <div class="tests-grid">
+                <div class="test-card">
+                    <div class="test-header">
+                        <h3>Test de Placement</h3>
+                        <span class="test-badge">Gratuit</span>
+                    </div>
+                    <div class="test-content">
+                        <p>Évaluez rapidement votre niveau pour intégrer le cours adapté à vos compétences actuelles.</p>
+                        <ul class="test-features">
+                            <li><i class="fas fa-check"></i> Durée : 30 minutes</li>
+                            <li><i class="fas fa-check"></i> Format : En ligne ou sur place</li>
+                            <li><i class="fas fa-check"></i> Résultat immédiat</li>
+                            <li><i class="fas fa-check"></i> Recommandation de cours</li>
+                        </ul>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-primary btn-full">Passer le test</a>
+                        {% else %}
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-full">S'inscrire pour passer le test</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="test-card featured">
+                    <div class="test-header">
+                        <h3>Certification CEFR</h3>
+                        <span class="test-badge">Officiel</span>
+                    </div>
+                    <div class="test-content">
+                        <p>Obtenez une certification officielle selon le Cadre Européen Commun de Référence pour les Langues.</p>
+                        <ul class="test-features">
+                            <li><i class="fas fa-check"></i> Niveaux : A1 à C2</li>
+                            <li><i class="fas fa-check"></i> Durée : 2-3 heures</li>
+                            <li><i class="fas fa-check"></i> Évaluation complète des 4 compétences</li>
+                            <li><i class="fas fa-check"></i> Certificat reconnu internationalement</li>
+                        </ul>
+                        <div class="test-price">À partir de 500 Dhs</div>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-primary btn-full">Réserver une session</a>
+                        {% else %}
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-full">S'inscrire</a>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="test-card">
+                    <div class="test-header">
+                        <h3>Test de Progression</h3>
+                        <span class="test-badge">Inclus</span>
+                    </div>
+                    <div class="test-content">
+                        <p>Suivez vos progrès pendant votre formation avec des évaluations régulières.</p>
+                        <ul class="test-features">
+                            <li><i class="fas fa-check"></i> Durée : 45 minutes</li>
+                            <li><i class="fas fa-check"></i> Fréquence : Mensuelle</li>
+                            <li><i class="fas fa-check"></i> Rapport détaillé</li>
+                            <li><i class="fas fa-check"></i> Inclus dans votre formation</li>
+                        </ul>
+                        {% if current_user.is_authenticated %}
+                            <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-primary btn-full">Voir mon planning</a>
+                        {% else %}
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-full">Se connecter</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Niveaux CEFR -->
+    <section class="cefr-levels">
+        <div class="container">
+            <h2>Les Niveaux du Cadre Européen (CEFR)</h2>
+            <div class="levels-table">
+                <div class="level-row header">
+                    <div class="level-cell">Niveau</div>
+                    <div class="level-cell">Description</div>
+                    <div class="level-cell">Compétences</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-cell level-name">A1<span>Débutant</span></div>
+                    <div class="level-cell">Peut comprendre et utiliser des expressions familières et quotidiennes.</div>
+                    <div class="level-cell">Communication de base, présentation simple.</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-cell level-name">A2<span>Élémentaire</span></div>
+                    <div class="level-cell">Peut communiquer lors de tâches simples et habituelles.</div>
+                    <div class="level-cell">Description d'environnement proche, sujets familiers.</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-cell level-name">B1<span>Intermédiaire</span></div>
+                    <div class="level-cell">Peut se débrouiller dans la plupart des situations rencontrées en voyage.</div>
+                    <div class="level-cell">Production de textes simples, expérience et événements.</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-cell level-name">B2<span>Intermédiaire avancé</span></div>
+                    <div class="level-cell">Peut communiquer avec spontanéité et aisance avec un locuteur natif.</div>
+                    <div class="level-cell">Expression claire et détaillée, argumentation.</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-cell level-name">C1<span>Avancé</span></div>
+                    <div class="level-cell">Peut s'exprimer spontanément et couramment sans chercher ses mots.</div>
+                    <div class="level-cell">Textes complexes, sujets spécialisés, nuances de sens.</div>
+                </div>
+                <div class="level-row">
+                    <div class="level-cell level-name">C2<span>Maîtrise</span></div>
+                    <div class="level-cell">Peut comprendre sans effort pratiquement tout ce qu'il/elle lit ou entend.</div>
+                    <div class="level-cell">Restitution précise, expression très fluide et précise.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Processus de certification -->
+    <section class="certification-process">
+        <div class="container">
+            <h2>Le Processus de Certification</h2>
+            <div class="process-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Inscription</h3>
+                        <p>Créez votre compte et choisissez le test qui correspond à vos besoins.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Planification</h3>
+                        <p>Réservez une date pour votre test selon les disponibilités.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-edit"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Passage du test</h3>
+                        <p>Complétez les différentes sections du test (écrit, oral, compréhension).</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Évaluation</h3>
+                        <p>Vos résultats sont évalués par nos examinateurs certifiés.</p>
+                    </div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-icon">
+                        <i class="fas fa-certificate"></i>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Certification</h3>
+                        <p>Recevez votre certificat officiel avec votre niveau CEFR.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <div class="container">
+            <h2>Questions Fréquentes</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Combien de temps dure la validité d'un certificat ?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Les certificats CEFR délivrés par OXFORD INSTITUT sont généralement valables pendant 2 ans. Cependant, certaines institutions peuvent exiger des certificats plus récents.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Puis-je passer un test sans suivre de cours ?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Oui, vous pouvez vous inscrire uniquement pour passer un test de certification sans suivre de cours chez nous.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Comment me préparer au test ?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Nous proposons des sessions de préparation spécifiques pour chaque niveau de test. Vous pouvez également accéder à des ressources en ligne via votre espace étudiant.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <h3>Que faire si je n'obtiens pas le niveau souhaité ?</h3>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Vous pouvez repasser le test après un délai minimum de 3 mois. Nous vous recommandons de suivre des cours ciblés pour améliorer vos compétences dans les domaines où vous avez rencontré des difficultés.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <h2>Prêt à évaluer votre niveau ?</h2>
+            <p>Inscrivez-vous dès maintenant pour passer un test ou contactez-nous pour plus d'informations.</p>
+            <div class="cta-buttons">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-primary btn-lg">Accéder à mon tableau de bord</a>
+                {% else %}
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">S'inscrire</a>
+                {% endif %}
+                <a href="{{ url_for('main.contact') }}" class="btn btn-outline btn-lg">Nous contacter</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // FAQ toggle
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const faqItem = this.parentElement;
+                    faqItem.classList.toggle('active');
+                    
+                    // Fermer les autres questions
+                    document.querySelectorAll('.faq-item').forEach(item => {
+                        if (item !== faqItem) {
+                            item.classList.remove('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}

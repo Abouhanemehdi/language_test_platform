@@ -1,121 +1,244 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block title %}Gestion des Tests{% endblock %}
 
-{% block content %}
-<div class="admin-container">
-    <div class="admin-header">
-        <h1>Gestion des Tests</h1>
-        <a href="{{ url_for('admin.create_test') }}" class="btn btn-primary">Créer un nouveau test</a>
-    </div>
+{% block page_title %}Gestion des Tests{% endblock %}
 
-    <div class="admin-section">
-        <h2>Tests pour les clients</h2>
-        {% if client_tests %}
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Titre</th>
-                        <th>Niveau</th>
-                        <th>Questions</th>
-                        <th>Statut</th>
-                        <th>Date de création</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for test in client_tests %}
-                    <tr>
-                        <td>{{ test.title }}</td>
-                        <td>{{ test.level }}</td>
-                        <td>{{ test.questions|length }}</td>
-                        <td>
-                            <span class="badge {% if test.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                                {{ "Actif" if test.is_active else "Inactif" }}
-                            </span>
-                        </td>
-                        <td>{{ test.created_at.strftime('%d/%m/%Y') }}</td>
-                        <td class="actions">
-                            <a href="{{ url_for('admin.view_test', test_id=test.id) }}" 
-                               class="btn btn-sm btn-secondary">Visualiser</a>
-                            <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" 
-                               class="btn btn-sm btn-secondary">Éditer</a>
-                            {% if test.is_active %}
-                            <form method="POST" action="{{ url_for('admin.deactivate_test', test_id=test.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-warning">Désactiver</button>
-                            </form>
-                            {% else %}
-                            <form method="POST" action="{{ url_for('admin.activate_test', test_id=test.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-success">Activer</button>
-                            </form>
-                            {% endif %}
-                            <button onclick="confirmDelete({{ test.id }})" class="btn btn-sm btn-danger">Supprimer</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="empty-state">Aucun test disponible pour les clients.</p>
-        {% endif %}
-    </div>
+{% block header_button %}
+<a href="{{ url_for('admin.create_test') }}" class="action-button">
+    <i class="fas fa-plus"></i> Créer un nouveau test
+</a>
+{% endblock %}
 
-    <div class="admin-section">
-        <h2>Tests pour les prospects</h2>
-        {% if prospect_tests %}
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Titre</th>
-                        <th>Niveau</th>
-                        <th>Questions</th>
-                        <th>Statut</th>
-                        <th>Date de création</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for test in prospect_tests %}
-                    <tr>
-                        <td>{{ test.title }}</td>
-                        <td>{{ test.level }}</td>
-                        <td>{{ test.questions|length }}</td>
-                        <td>
-                            <span class="badge {% if test.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                                {{ "Actif" if test.is_active else "Inactif" }}
-                            </span>
-                        </td>
-                        <td>{{ test.created_at.strftime('%d/%m/%Y') }}</td>
-                        <td class="actions">
-                            <a href="{{ url_for('admin.view_test', test_id=test.id) }}" 
-                               class="btn btn-sm btn-secondary">Visualiser</a>
-                            <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" 
-                               class="btn btn-sm btn-secondary">Éditer</a>
-                            {% if test.is_active %}
-                            <form method="POST" action="{{ url_for('admin.deactivate_test', test_id=test.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-warning">Désactiver</button>
-                            </form>
-                            {% else %}
-                            <form method="POST" action="{{ url_for('admin.activate_test', test_id=test.id) }}" style="display: inline;">
-                                <button type="submit" class="btn btn-sm btn-success">Activer</button>
-                            </form>
-                            {% endif %}
-                            <button onclick="confirmDelete({{ test.id }})" class="btn btn-sm btn-danger">Supprimer</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="empty-state">Aucun test disponible pour les prospects.</p>
-        {% endif %}
+{% block admin_content %}
+<div class="stats-section">
+    <div class="stat-card">
+        <h3>Total Tests</h3>
+        <span class="stat-number">{{ (prospect_tests + client_tests)|length }}</span>
+    </div>
+    <div class="stat-card">
+        <h3>Tests Actifs</h3>
+        <span class="stat-number">{{ (prospect_tests + client_tests)|selectattr('is_active', 'eq', true)|list|length }}</span>
+    </div>
+    <div class="stat-card">
+        <h3>Questions Totales</h3>
+        <span class="stat-number">
+            {% set total = 0 %}
+            {% for test in (prospect_tests + client_tests) %}
+                {% set total = total + test.questions|length %}
+            {% endfor %}
+            {{ total }}
+        </span>
     </div>
 </div>
 
+<div class="content-section">
+    <h2 class="section-title">Tests pour les prospects</h2>
+    <div class="tests-section">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Niveau</th>
+                    <th>Type</th>
+                    <th>Questions</th>
+                    <th>Durée</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in prospect_tests %}
+                <tr>
+                    <td>{{ test.title }}</td>
+                    <td>{{ test.level }}</td>
+                    <td>{{ test.type }}</td>
+                    <td>{{ test.questions|length }}</td>
+                    <td>{{ test.duration }} min</td>
+                    <td>
+                        <span class="status-badge {% if test.is_active %}active{% else %}inactive{% endif %}">
+                            {{ "Actif" if test.is_active else "Inactif" }}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn-icon" title="Éditer">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ url_for('admin.view_test', test_id=test.id) }}" class="btn-icon" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button class="btn-icon delete-test" data-test-id="{{ test.id }}" title="Supprimer">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="section-title">Tests pour les clients</h2>
+    <div class="tests-section">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Niveau</th>
+                    <th>Type</th>
+                    <th>Questions</th>
+                    <th>Durée</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in client_tests %}
+                <tr>
+                    <td>{{ test.title }}</td>
+                    <td>{{ test.level }}</td>
+                    <td>{{ test.type }}</td>
+                    <td>{{ test.questions|length }}</td>
+                    <td>{{ test.duration }} min</td>
+                    <td>
+                        <span class="status-badge {% if test.is_active %}active{% else %}inactive{% endif %}">
+                            {{ "Actif" if test.is_active else "Inactif" }}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn-icon" title="Éditer">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <a href="{{ url_for('admin.view_test', test_id=test.id) }}" class="btn-icon" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <button class="btn-icon delete-test" data-test-id="{{ test.id }}" title="Supprimer">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.level-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    background-color: #e8eaf6;
+    color: #031456;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-weight: 500;
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.status-badge.active {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.btn-edit, .btn-delete, .btn-activate, .btn-deactivate {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    border: none;
+    margin: 0 0.25rem;
+}
+
+.btn-edit {
+    background-color: #e3f2fd;
+    color: #0d47a1;
+}
+
+.btn-delete {
+    background-color: #ffebee;
+    color: #b71c1c;
+}
+
+.btn-activate {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+}
+
+.btn-deactivate {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.btn-edit:hover {
+    background-color: #bbdefb;
+}
+
+.btn-delete:hover {
+    background-color: #ffcdd2;
+}
+
+.btn-activate:hover {
+    background-color: #c8e6c9;
+}
+
+.btn-deactivate:hover {
+    background-color: #ffe0b2;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+</style>
+
 <script>
 function confirmDelete(testId) {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce test ?')) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce test ? Cette action est irréversible.')) {
         window.location.href = "{{ url_for('admin.delete_test', test_id=0) }}".replace('0', testId);
+    }
+}
+
+function activateTest(testId) {
+    if (confirm('Voulez-vous activer ce test ?')) {
+        fetch("{{ url_for('admin.activate_test', test_id=0) }}".replace('0', testId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(() => {
+            window.location.reload();
+        });
+    }
+}
+
+function deactivateTest(testId) {
+    if (confirm('Voulez-vous désactiver ce test ?')) {
+        fetch("{{ url_for('admin.deactivate_test', test_id=0) }}".replace('0', testId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        }).then(() => {
+            window.location.reload();
+        });
     }
 }
 </script>

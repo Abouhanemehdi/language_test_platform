@@ -1,110 +1,439 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
-{% block title %}Éditer le Test{% endblock %}
+{% block title %}Éditer {{ test.title }}{% endblock %}
 
-{% block content %}
-<div class="edit-test-container">
-    <div class="edit-header">
-        <h1>Éditer le test : {{ test.title }}</h1>
-    </div>
+{% block page_title %}Édition du test{% endblock %}
 
-    <div class="edit-content">
-        <!-- Informations du test -->
-        <section class="test-info">
-            <h2>Informations générales</h2>
-            <form method="POST" class="edit-form">
-                <div class="form-group">
-                    <label for="title">Titre</label>
-                    <input type="text" id="title" name="title" value="{{ test.title }}" required class="form-control">
-                </div>
+{% block admin_content %}
+<div class="content-section">
+    <!-- Section Informations du test -->
+    <div class="edit-section">
+        <div class="section-header">
+            <h2 class="section-title">Informations générales</h2>
+            <div class="test-meta">
+                <span class="meta-item">
+                    <i class="fas fa-calendar"></i> Créé le {{ test.created_at.strftime('%d/%m/%Y') }}
+                </span>
+                <span class="meta-item">
+                    <i class="fas fa-list-ol"></i> {{ test.questions|length }} questions
+                </span>
+            </div>
+        </div>
 
-                <div class="form-group">
+        <form method="POST" class="edit-form">
+            <div class="form-group">
+                <label for="title">Titre du test</label>
+                <input type="text" id="title" name="title" value="{{ test.title }}" class="form-control" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group flex-1">
                     <label for="level">Niveau</label>
-                    <select id="level" name="level" required class="form-control">
+                    <select id="level" name="level" class="form-control" required>
                         {% for level in ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] %}
                             <option value="{{ level }}" {% if test.level == level %}selected{% endif %}>
-                                {{ level }}
+                                {{ level }} - {{ {
+                                    'A1': 'Débutant',
+                                    'A2': 'Élémentaire',
+                                    'B1': 'Intermédiaire',
+                                    'B2': 'Intermédiaire supérieur',
+                                    'C1': 'Avancé',
+                                    'C2': 'Maîtrise'
+                                }[level] }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
-                <div class="form-group">
-                    <label for="user_role">Rôle utilisateur</label>
-                    <select id="user_role" name="user_role" required class="form-control">
+
+                <div class="form-group flex-1">
+                    <label for="user_role">Public cible</label>
+                    <select id="user_role" name="user_role" class="form-control" required>
                         <option value="client" {% if test.user_role == 'client' %}selected{% endif %}>Client</option>
                         <option value="prospect" {% if test.user_role == 'prospect' %}selected{% endif %}>Prospect</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label class="checkbox-label">
-                        <input type="checkbox" name="is_active" {% if test.is_active %}checked{% endif %}>
-                        Test actif
-                    </label>
-                </div>
+            </div>
 
-                <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
-            </form>
-        </section>
+            <div class="form-group">
+                <label for="duration">Durée (minutes)</label>
+                <input type="number" id="duration" name="duration" value="{{ test.duration }}" 
+                       class="form-control" required min="10" max="180">
+                <small class="form-text text-muted">La durée doit être comprise entre 10 et 180 minutes</small>
+            </div>
 
-        <!-- Liste des questions -->
-        <section class="questions-list">
-            <h2>Questions</h2>
-            <button class="btn btn-secondary" onclick="toggleAddQuestion()">Ajouter une question</button>
+            <div class="form-group">
+                <label for="description">Description du test</label>
+                <textarea id="description" name="description" class="form-control" rows="4">{{ test.description }}</textarea>
+            </div>
 
-            <form id="addQuestionForm" method="POST" action="{{ url_for('admin.add_question', test_id=test.id) }}" 
-                  class="add-question-form" style="display: none;">
-                <div class="form-group">
-                    <label for="question_text">Question</label>
-                    <textarea id="question_text" name="question_text" required class="form-control"></textarea>
-                </div>
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="is_active" name="is_active" {% if test.is_active %}checked{% endif %}>
+                    <span class="checkbox-label">Test actif</span>
+                </label>
+                <small class="form-text text-muted">Un test inactif ne sera pas visible par les utilisateurs</small>
+            </div>
 
-                <div class="form-group">
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="is_free" name="is_free" {% if test.is_free %}checked{% endif %}>
+                    <span class="checkbox-label">Test gratuit</span>
+                </label>
+                <small class="form-text text-muted">Les tests gratuits sont accessibles à tous les utilisateurs, y compris les prospects</small>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer les modifications
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Section Questions -->
+    <div class="edit-section">
+        <div class="section-header">
+            <h2 class="section-title">Questions du test</h2>
+            <button class="btn-primary" onclick="toggleAddQuestion()">
+                <i class="fas fa-plus"></i> Ajouter une question
+            </button>
+        </div>
+
+        <!-- Formulaire d'ajout de question -->
+        <form id="addQuestionForm" method="POST" action="{{ url_for('admin.add_question', test_id=test.id) }}" 
+              class="question-form" style="display: none;">
+            <div class="form-group">
+                <label for="question_text">Question</label>
+                <textarea id="question_text" name="question_text" class="form-control" required></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group flex-1">
                     <label for="question_type">Type de question</label>
-                    <select id="question_type" name="question_type" required class="form-control">
+                    <select id="question_type" name="question_type" class="form-control" required>
                         <option value="qcm">Choix multiples</option>
                         <option value="text">Réponse libre</option>
                     </select>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group flex-1">
                     <label for="points">Points</label>
-                    <input type="number" id="points" name="points" value="1" min="1" required class="form-control">
+                    <input type="number" id="points" name="points" value="1" min="1" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-plus"></i> Ajouter
+                </button>
+                <button type="button" class="btn-secondary" onclick="toggleAddQuestion()">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+        </form>
+
+        <!-- Liste des questions -->
+        {% if test.questions %}
+        <div class="questions-list">
+            {% for question in test.questions %}
+            <div class="question-card">
+                <div class="question-header">
+                    <span class="question-number">Question {{ loop.index }}</span>
+                    <span class="question-type-badge">
+                        {% if question.question_type == 'qcm' %}
+                            <i class="fas fa-list"></i> QCM
+                        {% else %}
+                            <i class="fas fa-pen"></i> Réponse libre
+                        {% endif %}
+                    </span>
+                    <span class="points-badge">{{ question.points }} pts</span>
                 </div>
 
-                <button type="submit" class="btn btn-primary">Ajouter la question</button>
-            </form>
+                <p class="question-text">{{ question.question_text }}</p>
 
-            {% if test.questions %}
-                <div class="questions-grid">
-                    {% for question in test.questions %}
-                        <div class="question-card">
-                            <h3>Question {{ loop.index }}</h3>
-                            <p>{{ question.question_text }}</p>
-                            <div class="question-meta">
-                                <span>Type: {{ question.question_type }}</span>
-                                <span>Points: {{ question.points }}</span>
-                            </div>
-                            <div class="question-actions">
-                                <a href="{{ url_for('admin.edit_question', question_id=question.id) }}" 
-                                   class="btn btn-small btn-secondary">Éditer</a>
-                                <a href="{{ url_for('admin.delete_question', question_id=question.id) }}" 
-                                   class="btn btn-small btn-danger"
-                                   onclick="return confirm('Supprimer cette question ?')">Supprimer</a>
-                            </div>
-                        </div>
+                {% if question.question_type == 'qcm' %}
+                <div class="answers-list">
+                    {% for answer in question.answers %}
+                    <div class="answer {% if answer.is_correct %}correct{% endif %}">
+                        <i class="fas {% if answer.is_correct %}fa-check-circle{% else %}fa-circle{% endif %}"></i>
+                        {{ answer.answer_text }}
+                    </div>
                     {% endfor %}
                 </div>
-            {% else %}
-                <p class="empty-state">Aucune question n'a été ajoutée à ce test.</p>
-            {% endif %}
-        </section>
+                {% endif %}
+
+                <div class="question-actions">
+                    <a href="{{ url_for('admin.edit_question', question_id=question.id) }}" class="btn-secondary">
+                        <i class="fas fa-edit"></i> Éditer
+                    </a>
+                    <button onclick="confirmDeleteQuestion({{ question.id }})" class="btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <p>Aucune question n'a été ajoutée à ce test.</p>
+            <p>Cliquez sur "Ajouter une question" pour commencer.</p>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+<style>
+.content-section {
+    display: grid;
+    gap: 2rem;
+}
+
+.edit-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.test-meta {
+    display: flex;
+    gap: 1rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #7f8c8d;
+    font-size: 0.875rem;
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.flex-1 {
+    flex: 1;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+    outline: none;
+}
+
+.form-text {
+    font-size: 0.875rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.checkbox-label {
+    color: #2c3e50;
+    user-select: none;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #eee;
+}
+
+.btn-primary, .btn-secondary, .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #e9ecef;
+    color: #2c3e50;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-primary:hover { background-color: #2980b9; }
+.btn-secondary:hover { background-color: #dee2e6; }
+.btn-danger:hover { background-color: #c0392b; }
+
+.question-form {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+}
+
+.questions-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.question-card {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 4px;
+    border-left: 4px solid #3498db;
+}
+
+.question-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.question-number {
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.question-type-badge, .points-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.question-type-badge {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+.points-badge {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+.question-text {
+    color: #2c3e50;
+    margin: 1rem 0;
+}
+
+.answers-list {
+    margin: 1rem 0;
+}
+
+.answer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    color: #2c3e50;
+}
+
+.answer.correct {
+    color: #2e7d32;
+}
+
+.question-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    color: #7f8c8d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    margin: 0.5rem 0;
+}
+
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232c3e50' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+</style>
+
 <script>
-function toggleAddQuestion() {
+const toggleAddQuestion = () => {
     const form = document.getElementById('addQuestionForm');
     form.style.display = form.style.display === 'none' ? 'block' : 'none';
-}
+};
+
+const confirmDeleteQuestion = (questionId) => {
+    const message = 'Êtes-vous sûr de vouloir supprimer cette question ? Cette action est irréversible.';
+    if (confirm(message)) {
+        const url = `/admin/delete_question/${questionId}`;
+        window.location.href = url;
+    }
+};
 </script>
 {% endblock %}

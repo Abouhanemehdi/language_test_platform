@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+
+{% block title %}Cours{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stylemainindex.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section (plus petit que la page d'accueil) -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Nos Cours de Langues</h1>
+            <p class="subtitle">Découvrez notre large gamme de cours adaptés à tous les niveaux</p>
+        </div>
+    </section>
+
+    <!-- Filtres de cours -->
+    <section class="filters">
+        <div class="container">
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="all">Tous les cours</button>
+                <button class="filter-tab" data-filter="anglais">Anglais</button>
+                <button class="filter-tab" data-filter="francais">Français</button>
+                <button class="filter-tab" data-filter="espagnol">Espagnol</button>
+                <button class="filter-tab" data-filter="allemand">Allemand</button>
+                <button class="filter-tab" data-filter="enfants">Cours pour enfants</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Grille de cours -->
+    <section class="courses">
+        <div class="container">
+            <div class="courses-grid">
+                <!-- Cours d'anglais -->
+                <div class="course-card" data-category="anglais">
+                    <div class="course-image">
+                        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Cours d'anglais">
+                        <div class="course-badge">Populaire</div>
+                    </div>
+                    <div class="course-content">
+                        <div class="course-level">Niveau A1 - C2</div>
+                        <h3>Anglais Général</h3>
+                        <p>Développez vos compétences en anglais pour la communication quotidienne et professionnelle.</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>60h</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-users"></i>
+                                <span>8-12 étudiants</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>Flexible</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <div class="course-price">À partir de 1000 Dhs</div>
+                            <a href="#" class="btn btn-primary">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cours d'anglais des affaires -->
+                <div class="course-card" data-category="anglais">
+                    <div class="course-image">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Anglais des affaires">
+                    </div>
+                    <div class="course-content">
+                        <div class="course-level">Niveau B1 - C2</div>
+                        <h3>Anglais des Affaires</h3>
+                        <p>Perfectionnez votre anglais professionnel pour exceller dans le monde des affaires.</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>40h</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-users"></i>
+                                <span>6-10 étudiants</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>Soir & Weekend</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <div class="course-price">1500 Dhs</div>
+                            <a href="#" class="btn btn-primary">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cours de français -->
+                <div class="course-card" data-category="francais">
+                    <div class="course-image">
+                        <img src="https://images.unsplash.com/photo-1549737221-bef65e2604a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Cours de français">
+                    </div>
+                    <div class="course-content">
+                        <div class="course-level">Niveau A1 - C2</div>
+                        <h3>Français Général</h3>
+                        <p>Apprenez le français avec des méthodes modernes et interactives.</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>60h</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-users"></i>
+                                <span>8-12 étudiants</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>Flexible</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <div class="course-price">900 Dhs</div>
+                            <a href="#" class="btn btn-primary">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cours d'espagnol -->
+                <div class="course-card" data-category="espagnol">
+                    <div class="course-image">
+                        <img src="https://images.unsplash.com/photo-1551649001-7a2482d98d05?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Cours d'espagnol">
+                    </div>
+                    <div class="course-content">
+                        <div class="course-level">Niveau A1 - B2</div>
+                        <h3>Espagnol Général</h3>
+                        <p>Découvrez la langue et la culture espagnole avec nos professeurs natifs.</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>50h</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-users"></i>
+                                <span>6-10 étudiants</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>Matin & Soir</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <div class="course-price">950 Dhs</div>
+                            <a href="#" class="btn btn-primary">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cours d'allemand -->
+                <div class="course-card" data-category="allemand">
+                    <div class="course-image">
+                        <img src="https://images.unsplash.com/photo-1527866959252-deab85ef7d1b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Cours d'allemand">
+                    </div>
+                    <div class="course-content">
+                        <div class="course-level">Niveau A1 - B2</div>
+                        <h3>Allemand Général</h3>
+                        <p>Maîtrisez l'allemand avec une approche pratique et communicative.</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>50h</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-users"></i>
+                                <span>6-8 étudiants</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>Weekend</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <div class="course-price">1100 Dhs</div>
+                            <a href="#" class="btn btn-primary">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cours pour enfants -->
+                <div class="course-card" data-category="enfants">
+                    <div class="course-image">
+                        <img src="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80" alt="Cours pour enfants">
+                    </div>
+                    <div class="course-content">
+                        <div class="course-level">6-12 ans</div>
+                        <h3>Anglais pour Enfants</h3>
+                        <p>Cours ludiques et interactifs pour initier les enfants à l'anglais.</p>
+                        <div class="course-details">
+                            <div class="course-detail">
+                                <i class="fas fa-clock"></i>
+                                <span>30h</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-users"></i>
+                                <span>6-8 enfants</span>
+                            </div>
+                            <div class="course-detail">
+                                <i class="fas fa-calendar"></i>
+                                <span>Mercredi & Samedi</span>
+                            </div>
+                        </div>
+                        <div class="course-footer">
+                            <div class="course-price">800 Dhs</div>
+                            <a href="#" class="btn btn-primary">En savoir plus</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Méthode d'enseignement -->
+    <section class="teaching-method">
+        <div class="container">
+            <h2>Notre Méthode d'Enseignement</h2>
+            <div class="method-grid">
+                <div class="method-item">
+                    <div class="method-icon">
+                        <i class="fas fa-comments"></i>
+                    </div>
+                    <h3>Approche Communicative</h3>
+                    <p>Nos cours sont axés sur la pratique et la communication réelle pour une progression rapide.</p>
+                </div>
+                <div class="method-item">
+                    <div class="method-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Professeurs Natifs</h3>
+                    <p>Apprenez avec des professeurs natifs qualifiés pour une immersion linguistique complète.</p>
+                </div>
+                <div class="method-item">
+                    <div class="method-icon">
+                        <i class="fas fa-laptop"></i>
+                    </div>
+                    <h3>Outils Numériques</h3>
+                    <p>Accédez à des ressources numériques complémentaires pour renforcer votre apprentissage.</p>
+                </div>
+                <div class="method-item">
+                    <div class="method-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Suivi Personnalisé</h3>
+                    <p>Bénéficiez d'un suivi régulier de vos progrès et d'un accompagnement personnalisé.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+        <div class="container">
+            <h2>Prêt à commencer votre apprentissage ?</h2>
+            <p>Inscrivez-vous dès maintenant ou contactez-nous pour plus d'informations sur nos cours.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">S'inscrire</a>
+                <a href="{{ url_for('main.contact') }}" class="btn btn-outline btn-lg">Nous contacter</a>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filtrage des cours
+            const filterTabs = document.querySelectorAll('.filter-tab');
+            const courseCards = document.querySelectorAll('.course-card');
+            
+            filterTabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Retirer la classe active de tous les onglets
+                    filterTabs.forEach(t => t.classList.remove('active'));
+                    // Ajouter la classe active à l'onglet cliqué
+                    this.classList.add('active');
+                    
+                    const filter = this.getAttribute('data-filter');
+                    
+                    courseCards.forEach(card => {
+                        if (filter === 'all' || card.getAttribute('data-category') === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends "layout_client.html" %}
+
+{% block content %}
+<div class="evaluation-container">
+    <div class="evaluation-header">
+        <h1>Évaluation de la réponse écrite</h1>
+        <a href="{{ url_for('test.show_result', result_id=answer.test_result_id) }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour aux résultats
+        </a>
+    </div>
+
+    <div class="content-section">
+        <div class="question-section">
+            <h3>Question</h3>
+            <div class="question-content">
+                {{ question.question_text }}
+            </div>
+        </div>
+
+        <div class="answer-section">
+            <h3>Réponse de l'étudiant</h3>
+            <div class="answer-content">
+                {{ answer.text_answer|nl2br }}
+            </div>
+        </div>
+
+        <form method="POST" class="evaluation-form">
+            <div class="form-group">
+                <label for="score">Score (sur 100)</label>
+                <input type="number" id="score" name="score" class="form-control" 
+                       min="0" max="100" step="0.1" required 
+                       value="{{ answer.writing_score|default(0, true) }}">
+            </div>
+
+            <div class="form-group">
+                <label for="feedback">Feedback et remarques</label>
+                <textarea id="feedback" name="feedback" class="form-control" rows="5" 
+                          placeholder="Donnez un feedback constructif à l'étudiant...">{{ answer.feedback|default('') }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer l'évaluation
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.evaluation-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.evaluation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.evaluation-header h1 {
+    margin: 0;
+    font-size: 1.75rem;
+    color: var(--primary-color);
+}
+
+.content-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.question-section, .answer-section {
+    margin-bottom: 2rem;
+}
+
+.question-section h3, .answer-section h3 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+.question-content, .answer-content {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    white-space: pre-wrap;
+}
+
+.evaluation-form {
+    margin-top: 2rem;
+    border-top: 1px solid var(--border-color);
+    padding-top: 2rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+input[type="number"].form-control {
+    max-width: 200px;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+    .evaluation-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .evaluation-header .btn {
+        width: 100%;
+    }
+    
+    .content-section {
+        padding: 1rem;
+    }
+}
+</style>
+{% endblock %} 

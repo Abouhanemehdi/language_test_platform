@@ -1,0 +1,391 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Gestion des Tests{% endblock %}
+
+{% block page_title %}Gestion des Tests{% endblock %}
+
+{% block admin_content %}
+<div class="content-section">
+    <!-- Statistiques -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <i class="fas fa-clipboard-list"></i>
+            <div class="stat-info">
+                <span class="stat-value">{{ total_tests }}</span>
+                <span class="stat-label">Tests au total</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-check-circle"></i>
+            <div class="stat-info">
+                <span class="stat-value">{{ active_tests }}</span>
+                <span class="stat-label">Tests actifs</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-question-circle"></i>
+            <div class="stat-info">
+                <span class="stat-value">{{ total_questions }}</span>
+                <span class="stat-label">Questions totales</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liste des tests -->
+    <div class="tests-section">
+        <div class="section-header">
+            <h2>Tests pour les prospects</h2>
+            <a href="{{ url_for('admin.select_test_type') }}" class="btn-primary">
+                <i class="fas fa-plus"></i> Créer un nouveau test
+            </a>
+        </div>
+        
+        <div class="tests-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Niveau</th>
+                        <th>Type</th>
+                        <th>Questions</th>
+                        <th>Durée</th>
+                        <th>Statut</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in prospect_tests %}
+                    <tr>
+                        <td>{{ test.title }}</td>
+                        <td><span class="level-badge">{{ test.level }}</span></td>
+                        <td>{{ test.test_type }}</td>
+                        <td>{{ test.questions|length }}</td>
+                        <td>{{ test.duration }} min</td>
+                        <td>
+                            <span class="status-badge {% if test.is_active %}active{% else %}inactive{% endif %}">
+                                {% if test.is_active %}Actif{% else %}Inactif{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ test.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn-icon edit" title="Éditer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('admin.view_test', test_id=test.id) }}" class="btn-icon view" title="Visualiser" target="_blank">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if test.is_active %}
+                            <form action="{{ url_for('admin.deactivate_test', test_id=test.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn-icon deactivate" title="Désactiver">
+                                    <i class="fas fa-toggle-on"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <form action="{{ url_for('admin.activate_test', test_id=test.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn-icon activate" title="Activer">
+                                    <i class="fas fa-toggle-off"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>Aucun test n'a été créé pour les prospects</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tests-section">
+        <div class="section-header">
+            <h2>Tests pour les clients</h2>
+        </div>
+        
+        <div class="tests-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Titre</th>
+                        <th>Niveau</th>
+                        <th>Type</th>
+                        <th>Questions</th>
+                        <th>Durée</th>
+                        <th>Statut</th>
+                        <th>Créé le</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for test in client_tests %}
+                    <tr>
+                        <td>{{ test.title }}</td>
+                        <td><span class="level-badge">{{ test.level }}</span></td>
+                        <td>{{ test.test_type }}</td>
+                        <td>{{ test.questions|length }}</td>
+                        <td>{{ test.duration }} min</td>
+                        <td>
+                            <span class="status-badge {% if test.is_active %}active{% else %}inactive{% endif %}">
+                                {% if test.is_active %}Actif{% else %}Inactif{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ test.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td class="actions">
+                            <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn-icon edit" title="Éditer">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{{ url_for('admin.view_test', test_id=test.id) }}" class="btn-icon view" title="Visualiser" target="_blank">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if test.is_active %}
+                            <form action="{{ url_for('admin.deactivate_test', test_id=test.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn-icon deactivate" title="Désactiver">
+                                    <i class="fas fa-toggle-on"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <form action="{{ url_for('admin.activate_test', test_id=test.id) }}" method="POST" class="d-inline">
+                                <button type="submit" class="btn-icon activate" title="Activer">
+                                    <i class="fas fa-toggle-off"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <p>Aucun test n'a été créé pour les clients</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.content-section {
+    display: grid;
+    gap: 2rem;
+}
+
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: #3498db;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.stat-label {
+    color: #7f8c8d;
+    font-size: 0.875rem;
+}
+
+.tests-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.tests-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th {
+    text-align: left;
+    padding: 1rem;
+    color: #7f8c8d;
+    font-weight: 500;
+    border-bottom: 2px solid #e9ecef;
+}
+
+td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #2c3e50;
+}
+
+.level-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.status-badge.active {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-badge.inactive {
+    background: #fafafa;
+    color: #7f8c8d;
+}
+
+.actions {
+    display: flex;
+    gap: 0.75rem;
+    white-space: nowrap;
+}
+
+.btn-icon {
+    padding: 0.5rem;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-icon i {
+    font-size: 1rem;
+}
+
+/* Styles spécifiques pour chaque action */
+.btn-icon.edit {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.btn-icon.edit:hover {
+    background: #bbdefb;
+}
+
+.btn-icon.view {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-icon.view:hover {
+    background: #c8e6c9;
+}
+
+.btn-icon.delete {
+    background: #ffebee;
+    color: #e74c3c;
+}
+
+.btn-icon.delete:hover {
+    background: #ffcdd2;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+    color: #7f8c8d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    margin: 0.5rem 0;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+}
+
+/* Styles pour les boutons d'action */
+.btn-icon.activate {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-icon.activate:hover {
+    background: #c8e6c9;
+}
+
+.btn-icon.deactivate {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.btn-icon.deactivate:hover {
+    background: #ffe0b2;
+}
+</style>
+{% endblock %}

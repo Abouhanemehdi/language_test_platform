@@ -2,28 +2,45 @@
 
 {% block title %}Connexion{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/stylemainindex.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
 {% block content %}
-    <div class="auth-form">
-        <h1>Connexion</h1>
-        <form method="POST" action="{{ url_for('auth.login') }}">
-            <div class="form-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" required>
+    <!-- Hero Section (plus petit que la page d'accueil) -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Connexion</h1>
+            <p class="subtitle">Connectez-vous à votre compte pour accéder à nos services</p>
+        </div>
+    </section>
+
+    <!-- Formulaire de connexion -->
+    <section class="auth-section">
+        <div class="container">
+            <div class="auth-form-container">
+                <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Mot de passe</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember_me"> Se souvenir de moi
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-lg btn-full">Se connecter</button>
+                </form>
+                <p class="auth-link">Pas encore inscrit ? <a href="{{ url_for('auth.register') }}">Créer un compte</a></p>
             </div>
-            
-            <div class="form-group">
-                <label for="password">Mot de passe</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            
-            <div class="form-group">
-                <label>
-                    <input type="checkbox" name="remember_me"> Se souvenir de moi
-                </label>
-            </div>
-            
-            <button type="submit">Se connecter</button>
-        </form>
-        <p>Pas encore inscrit ? <a href="{{ url_for('auth.register') }}">Créer un compte</a></p>
-    </div>
+        </div>
+    </section>
 {% endblock %}

@@ -1,66 +1,446 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block title %}Créer un Test{% endblock %}
 
-{% block content %}
-<div class="admin-container">
-    <div class="admin-header">
-        <h1>Créer un nouveau test</h1>
-        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Retour au dashboard</a>
+{% block admin_content %}
+<div class="content-section">
+    <div class="section-header">
+        <h2>Créer un nouveau test</h2>
     </div>
 
-    <div class="form-section">
-        <form method="POST" class="test-form">
+    <form method="POST" id="createTestForm">
+        <!-- Informations de base -->
+        <div class="form-section">
+            <h3>Informations générales</h3>
             <div class="form-group">
                 <label for="title">Titre du test</label>
-                <input type="text" id="title" name="title" class="form-control" required 
-                       placeholder="Ex: Test de niveau - Anglais">
+                <input type="text" class="form-control" id="title" name="title" required>
             </div>
-
+            
             <div class="form-group">
-                <label for="level">Niveau</label>
-                <select id="level" name="level" class="form-control" required>
-                    <option value="">Sélectionnez un niveau</option>
-                    <option value="A1">A1 - Débutant</option>
-                    <option value="A2">A2 - Élémentaire</option>
-                    <option value="B1">B1 - Intermédiaire</option>
-                    <option value="B2">B2 - Intermédiaire supérieur</option>
-                    <option value="C1">C1 - Avancé</option>
-                    <option value="C2">C2 - Maîtrise</option>
+                <label for="description">Description</label>
+                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="level">Niveau</label>
+                    <select class="form-control" id="level" name="level" required>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                        <option value="C2">C2</option>
+                    </select>
+                </div>
+                
+                <div class="form-group col-md-4">
+                    <label for="user_role">Type d'utilisateur</label>
+                    <select class="form-control" id="user_role" name="user_role" required>
+                        <option value="prospect">Prospect</option>
+                        <option value="client">Client</option>
+                    </select>
+                </div>
+                
+                <div class="form-group col-md-4">
+                    <label for="duration">Durée (minutes)</label>
+                    <input type="number" class="form-control" id="duration" name="duration" required min="1">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="test_type">Type de test</label>
+                <select class="form-control" id="test_type" name="test_type" required>
+                    <option value="qcm">QCM</option>
+                    <option value="reading">Compréhension écrite</option>
+                    <option value="writing">Expression écrite</option>
+                    <option value="mixed">Mixte</option>
                 </select>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label for="user_role">Rôle utilisateur</label>
-                <select id="user_role" name="user_role" class="form-control" required>
-                    <option value="">Sélectionnez un rôle</option>
-                    <option value="client">Client</option>
-                    <option value="prospect">Prospect</option>
-                </select>
+        <!-- Sections du test -->
+        <div class="form-section" id="sectionsContainer">
+            <h3>Sections du test</h3>
+            <div class="section-actions">
+                <button type="button" class="btn btn-secondary" onclick="addSection()">
+                    <i class="fas fa-plus"></i> Ajouter une section
+                </button>
             </div>
+            <div id="sections"></div>
+        </div>
 
-            <div class="form-group">
-                <label for="duration">Durée (minutes)</label>
-                <input type="number" id="duration" name="duration" class="form-control" 
-                       required min="10" max="180" value="60">
-            </div>
-
-            <div class="form-group">
-                <label for="description">Description du test</label>
-                <textarea id="description" name="description" class="form-control" rows="4"
-                         placeholder="Décrivez le contenu et les objectifs du test"></textarea>
-            </div>
-
-            <div class="form-check">
-                <input type="checkbox" id="is_active" name="is_active" class="form-check-input" checked>
-                <label class="form-check-label" for="is_active">Activer le test immédiatement</label>
-            </div>
-
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Créer le test</button>
-                <button type="reset" class="btn btn-secondary">Réinitialiser</button>
-            </div>
-        </form>
-    </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Créer le test</button>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
 </div>
+
+<template id="sectionTemplate">
+    <div class="section-item" data-section-index="INDEX">
+        <div class="section-header">
+            <h4>Section #<span class="section-number">INDEX</span></h4>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeSection(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        
+        <div class="form-group">
+            <label>Titre de la section</label>
+            <input type="text" class="form-control" name="sections[INDEX][title]" required>
+        </div>
+        
+        <div class="form-group">
+            <label>Type de section</label>
+            <select class="form-control" name="sections[INDEX][type]" onchange="updateSectionContent(this)" required>
+                <option value="qcm">QCM</option>
+                <option value="reading">Compréhension écrite</option>
+                <option value="writing">Expression écrite</option>
+            </select>
+        </div>
+        
+        <div class="section-content">
+            <!-- Le contenu sera mis à jour en fonction du type -->
+        </div>
+    </div>
+</template>
+
+<template id="readingContentTemplate">
+    <div class="form-group">
+        <label>Texte à lire</label>
+        <textarea class="form-control" name="sections[INDEX][content]" rows="6" required></textarea>
+    </div>
+    <div class="questions-container">
+        <h5>Questions</h5>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addQuestion(this, 'reading')">
+            <i class="fas fa-plus"></i> Ajouter une question
+        </button>
+        <div class="questions"></div>
+    </div>
+</template>
+
+<template id="writingContentTemplate">
+    <div class="form-group">
+        <label>Sujet/Prompt</label>
+        <textarea class="form-control" name="sections[INDEX][content]" rows="4" required></textarea>
+    </div>
+    <div class="criteria-container">
+        <h5>Critères d'évaluation</h5>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addCriteria(this)">
+            <i class="fas fa-plus"></i> Ajouter un critère
+        </button>
+        <div class="criteria"></div>
+    </div>
+</template>
+
+<template id="qcmContentTemplate">
+    <div class="questions-container">
+        <h5>Questions</h5>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addQuestion(this, 'qcm')">
+            <i class="fas fa-plus"></i> Ajouter une question
+        </button>
+        <div class="questions"></div>
+    </div>
+</template>
+
+<template id="questionTemplate">
+    <div class="question-item">
+        <div class="question-header">
+            <h6>Question #<span class="question-number">NUMBER</span></h6>
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeQuestion(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        
+        <div class="form-group">
+            <label>Question</label>
+            <textarea class="form-control" name="sections[SECTION_INDEX][questions][QUESTION_INDEX][text]" required></textarea>
+        </div>
+        
+        <div class="form-group">
+            <label>Points</label>
+            <input type="number" class="form-control" name="sections[SECTION_INDEX][questions][QUESTION_INDEX][points]" value="1" min="1" required>
+        </div>
+        
+        <div class="answers-container">
+            <h6>Réponses</h6>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="addAnswer(this)">
+                <i class="fas fa-plus"></i> Ajouter une réponse
+            </button>
+            <div class="answers"></div>
+        </div>
+    </div>
+</template>
+
+<template id="answerTemplate">
+    <div class="answer-item">
+        <div class="form-row">
+            <div class="col-md-8">
+                <input type="text" class="form-control" name="sections[SECTION_INDEX][questions][QUESTION_INDEX][answers][ANSWER_INDEX][text]" placeholder="Réponse" required>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="sections[SECTION_INDEX][questions][QUESTION_INDEX][correct_answer]" value="ANSWER_INDEX" required>
+                    <label class="form-check-label">Réponse correcte</label>
+                </div>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeAnswer(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="form-group mt-2">
+            <input type="text" class="form-control" name="sections[SECTION_INDEX][questions][QUESTION_INDEX][answers][ANSWER_INDEX][explanation]" placeholder="Explication (optionnel)">
+        </div>
+    </div>
+</template>
+
+<template id="criteriaTemplate">
+    <div class="criteria-item">
+        <div class="form-row">
+            <div class="col-md-4">
+                <input type="text" class="form-control" name="sections[SECTION_INDEX][criteria][CRITERIA_INDEX][name]" placeholder="Nom du critère" required>
+            </div>
+            <div class="col-md-2">
+                <input type="number" class="form-control" name="sections[SECTION_INDEX][criteria][CRITERIA_INDEX][max_points]" placeholder="Points max" required min="1">
+            </div>
+            <div class="col-md-5">
+                <input type="text" class="form-control" name="sections[SECTION_INDEX][criteria][CRITERIA_INDEX][description]" placeholder="Description">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeCriteria(this)">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<style>
+.content-section {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.form-section h3 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+.section-item {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-item {
+    margin: 1rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.answer-item {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.criteria-item {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+    display: flex;
+    gap: 1rem;
+}
+
+.section-actions {
+    margin-bottom: 1rem;
+}
+
+.questions-container, .criteria-container {
+    margin-top: 1rem;
+}
+
+.answers-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 6px;
+}
+</style>
+
+<script>
+let sectionCount = 0;
+
+function addSection() {
+    const container = document.getElementById('sections');
+    const template = document.getElementById('sectionTemplate');
+    const section = template.content.cloneNode(true);
+    
+    // Remplacer INDEX par le numéro de section
+    section.querySelectorAll('[data-section-index="INDEX"]').forEach(el => {
+        el.dataset.sectionIndex = sectionCount;
+    });
+    section.querySelectorAll('[name*="INDEX"]').forEach(el => {
+        el.name = el.name.replace('INDEX', sectionCount);
+    });
+    section.querySelector('.section-number').textContent = sectionCount + 1;
+    
+    container.appendChild(section);
+    sectionCount++;
+}
+
+function removeSection(button) {
+    button.closest('.section-item').remove();
+}
+
+function updateSectionContent(select) {
+    const sectionItem = select.closest('.section-item');
+    const contentContainer = sectionItem.querySelector('.section-content');
+    const sectionIndex = sectionItem.dataset.sectionIndex;
+    const type = select.value;
+    
+    // Vider le contenu actuel
+    contentContainer.innerHTML = '';
+    
+    // Ajouter le nouveau contenu en fonction du type
+    const template = document.getElementById(`${type}ContentTemplate`);
+    const content = template.content.cloneNode(true);
+    
+    // Remplacer INDEX par le numéro de section
+    content.querySelectorAll('[name*="INDEX"]').forEach(el => {
+        el.name = el.name.replace('INDEX', sectionIndex);
+    });
+    
+    contentContainer.appendChild(content);
+}
+
+function addQuestion(button, type) {
+    const questionsContainer = button.nextElementSibling;
+    const template = document.getElementById('questionTemplate');
+    const question = template.content.cloneNode(true);
+    
+    const sectionItem = button.closest('.section-item');
+    const sectionIndex = sectionItem.dataset.sectionIndex;
+    const questionIndex = questionsContainer.children.length;
+    
+    // Mettre à jour les index
+    question.querySelectorAll('[name*="SECTION_INDEX"]').forEach(el => {
+        el.name = el.name.replace('SECTION_INDEX', sectionIndex);
+    });
+    question.querySelectorAll('[name*="QUESTION_INDEX"]').forEach(el => {
+        el.name = el.name.replace('QUESTION_INDEX', questionIndex);
+    });
+    question.querySelector('.question-number').textContent = questionIndex + 1;
+    
+    questionsContainer.appendChild(question);
+}
+
+function removeQuestion(button) {
+    button.closest('.question-item').remove();
+}
+
+function addAnswer(button) {
+    const answersContainer = button.nextElementSibling;
+    const template = document.getElementById('answerTemplate');
+    const answer = template.content.cloneNode(true);
+    
+    const questionItem = button.closest('.question-item');
+    const sectionItem = questionItem.closest('.section-item');
+    const sectionIndex = sectionItem.dataset.sectionIndex;
+    const questionIndex = Array.from(questionItem.parentElement.children).indexOf(questionItem);
+    const answerIndex = answersContainer.children.length;
+    
+    // Mettre à jour les index
+    answer.querySelectorAll('[name*="SECTION_INDEX"]').forEach(el => {
+        el.name = el.name.replace('SECTION_INDEX', sectionIndex);
+    });
+    answer.querySelectorAll('[name*="QUESTION_INDEX"]').forEach(el => {
+        el.name = el.name.replace('QUESTION_INDEX', questionIndex);
+    });
+    answer.querySelectorAll('[name*="ANSWER_INDEX"]').forEach(el => {
+        el.name = el.name.replace('ANSWER_INDEX', answerIndex);
+    });
+    
+    answersContainer.appendChild(answer);
+}
+
+function removeAnswer(button) {
+    button.closest('.answer-item').remove();
+}
+
+function addCriteria(button) {
+    const criteriaContainer = button.nextElementSibling;
+    const template = document.getElementById('criteriaTemplate');
+    const criteria = template.content.cloneNode(true);
+    
+    const sectionItem = button.closest('.section-item');
+    const sectionIndex = sectionItem.dataset.sectionIndex;
+    const criteriaIndex = criteriaContainer.children.length;
+    
+    // Mettre à jour les index
+    criteria.querySelectorAll('[name*="SECTION_INDEX"]').forEach(el => {
+        el.name = el.name.replace('SECTION_INDEX', sectionIndex);
+    });
+    criteria.querySelectorAll('[name*="CRITERIA_INDEX"]').forEach(el => {
+        el.name = el.name.replace('CRITERIA_INDEX', criteriaIndex);
+    });
+    
+    criteriaContainer.appendChild(criteria);
+}
+
+function removeCriteria(button) {
+    button.closest('.criteria-item').remove();
+}
+
+// Initialiser le formulaire avec une section
+document.addEventListener('DOMContentLoaded', function() {
+    addSection();
+});
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%232c3e50' viewBox='0 0 16 16'%3E%3Cpath d='M8 11.5l-5-5h10l-5 5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.5rem;
+}
+</style>
 {% endblock %}

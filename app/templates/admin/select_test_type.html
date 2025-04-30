@@ -1,0 +1,184 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Sélection du type de test{% endblock %}
+
+{% block page_title %}Créer un nouveau test{% endblock %}
+
+{% block admin_content %}
+<div class="content-section">
+    <div class="section-header">
+        <h2 class="section-title">Choisissez le type de test à créer</h2>
+    </div>
+
+    <div class="test-types-grid">
+        <!-- Test QCM -->
+        <div class="test-type-card">
+            <div class="card-icon">
+                <i class="fas fa-list-ul"></i>
+            </div>
+            <div class="card-content">
+                <h3>Test QCM</h3>
+                <p>Questions à choix multiples avec correction automatique</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Questions à choix multiples</li>
+                    <li><i class="fas fa-check"></i> Correction automatique</li>
+                    <li><i class="fas fa-check"></i> Résultats immédiats</li>
+                    <li><i class="fas fa-check"></i> Idéal pour l'évaluation rapide</li>
+                </ul>
+                <a href="{{ url_for('admin.create_qcm_test') }}" class="btn-primary">
+                    <i class="fas fa-plus"></i> Créer un test QCM
+                </a>
+            </div>
+        </div>
+
+        <!-- Test Mixte -->
+        <div class="test-type-card">
+            <div class="card-icon">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="card-content">
+                <h3>Test Mixte</h3>
+                <p>Combinaison de différents types d'exercices</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Sections multiples</li>
+                    <li><i class="fas fa-check"></i> Questions variées</li>
+                    <li><i class="fas fa-check"></i> Compréhension écrite</li>
+                    <li><i class="fas fa-check"></i> Expression écrite</li>
+                </ul>
+                <a href="{{ url_for('admin.create_mixed_test') }}" class="btn-primary">
+                    <i class="fas fa-plus"></i> Créer un test mixte
+                </a>
+            </div>
+        </div>
+
+        <!-- Test d'Écriture -->
+        <div class="test-type-card">
+            <div class="card-icon">
+                <i class="fas fa-pen-fancy"></i>
+            </div>
+            <div class="card-content">
+                <h3>Test d'Écriture</h3>
+                <p>Évaluation approfondie des compétences rédactionnelles</p>
+                <ul class="features-list">
+                    <li><i class="fas fa-check"></i> Sujets de rédaction</li>
+                    <li><i class="fas fa-check"></i> Critères d'évaluation</li>
+                    <li><i class="fas fa-check"></i> Feedback détaillé</li>
+                    <li><i class="fas fa-check"></i> Évaluation personnalisée</li>
+                </ul>
+                <a href="{{ url_for('admin.create_writing_test') }}" class="btn-primary">
+                    <i class="fas fa-plus"></i> Créer un test d'écriture
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.test-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.test-type-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.test-type-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.card-icon {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+}
+
+.card-icon i {
+    font-size: 3rem;
+}
+
+.card-content {
+    padding: 2rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-content h3 {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.card-content p {
+    color: #7f8c8d;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.features-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem 0;
+    flex-grow: 1;
+}
+
+.features-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #2c3e50;
+    margin-bottom: 0.75rem;
+}
+
+.features-list li i {
+    color: #27ae60;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    width: 100%;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    color: white;
+    text-decoration: none;
+}
+
+.section-header {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+</style>
+{% endblock %} 

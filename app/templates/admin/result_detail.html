@@ -1,241 +1,544 @@
-{% extends "base.html" %}
-
-{% block title %}Détails du résultat{% endblock %}
+{% extends "admin/base_admin.html" %}
 
 {% block content %}
-<div class="admin-container">
-    <div class="admin-header">
+<div class="content-section">
+    <div class="result-header">
         <h1>Détails du résultat</h1>
-        <span class="badge {% if result.validated %}badge-success{% else %}badge-warning{% endif %}">
-            {% if result.validated %}Validé{% else %}En attente{% endif %}
-        </span>
-    </div>
-
-    <div class="admin-section">
-        <h2>Informations générales</h2>
-        <div class="info-grid">
-            <div class="info-row">
-                <div class="info-label">Utilisateur :</div>
+        <div class="result-overview">
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-user"></i>
+                    <span>Candidat</span>
+                </div>
                 <div class="info-value">{{ user.username }}</div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Test :</div>
+            
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-file-alt"></i>
+                    <span>Test</span>
+                </div>
                 <div class="info-value">{{ test.title }}</div>
             </div>
-            <div class="info-row">
-                <div class="info-label">Date :</div>
-                <div class="info-value">{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Score :</div>
-                <div class="info-value">{{ result.score|round(1) }}%</div>
-            </div>
-            <div class="info-row">
-                <div class="info-label">Niveau atteint :</div>
-                <div class="info-value">{{ result.level_achieved }}</div>
+
+            <div class="info-card">
+                <div class="info-label">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Score global</span>
+                </div>
+                <div class="info-value">{{ "%.1f"|format(result.score) }}%</div>
             </div>
         </div>
     </div>
 
-    <div class="admin-section">
-        <h2>Réponses</h2>
-        
-        {% for detail in answer_details %}
-        <div class="question-block">
-            <div class="question-header">
-                <h3>Question {{ loop.index }}</h3>
-                <span class="badge {% if detail.is_correct %}badge-success{% else %}badge-danger{% endif %}">
-                    {% if detail.is_correct %}Correct{% else %}Incorrect{% endif %}
-                </span>
+    <div class="sections-container">
+        {% for section_id, section_data in sections_results.items() %}
+        <div class="section-card">
+            <div class="section-header">
+                <h2>{{ section_data.section.title }}</h2>
+                {% if section_data.section.section_type != 'writing' %}
+                <div class="section-score">
+                    Score : {{ "%.1f"|format(section_data.score) }}%
+                </div>
+                {% endif %}
             </div>
-            <div class="question-content">
-                <div class="question-text">{{ detail.question.question_text }}</div>
-                
-                <div class="answer-row">
-                    <div class="answer-label">Réponse de l'utilisateur:</div>
-                    <div class="answer-value {% if not detail.is_correct %}incorrect{% endif %}">
-                        {% if detail.selected_answer %}
-                            {{ detail.selected_answer.answer_text }}
+
+            {% if section_data.section.section_type == 'reading' %}
+            <div class="section-content">
+                <div class="reading-text">
+                    {{ section_data.section.content|nl2br }}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="questions-list">
+                {% for answer in section_data.answers %}
+                <div class="question-card {% if answer.question.question_type == 'writing' %}writing{% elif answer.is_correct %}correct{% else %}incorrect{% endif %}">
+                    <div class="question-header">
+                        <div class="question-type">
+                            {% if answer.question.question_type == 'writing' %}
+                                <i class="fas fa-pen"></i> Expression écrite
+                            {% else %}
+                                Question {{ loop.index }}
+                            {% endif %}
+                        </div>
+                        <div class="question-status">
+                            {% if answer.question.question_type == 'writing' %}
+                                {% if answer.is_evaluated %}
+                                    <span class="badge success">Note : {{ "%.1f"|format(answer.writing_score) }}%</span>
+                                {% else %}
+                                    <span class="badge warning">En attente d'évaluation</span>
+                                {% endif %}
+                            {% else %}
+                                {% if answer.is_correct %}
+                                    <span class="badge success">Correct</span>
+                                {% else %}
+                                    <span class="badge danger">Incorrect</span>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="question-content">
+                        <div class="question-text">
+                            {{ answer.question.question_text }}
+                        </div>
+                        
+                        {% if answer.question.question_type == 'writing' %}
+                            <div class="writing-response">
+                                <h4>Réponse de l'étudiant :</h4>
+                                <div class="response-text">
+                                    {{ answer.text_answer|nl2br }}
+                                </div>
+                                
+                                {% if not answer.is_evaluated %}
+                                    <div class="evaluation-form">
+                                        <h4>Évaluation</h4>
+                                        <form method="POST" action="{{ url_for('admin.evaluate_writing', answer_id=answer.id) }}">
+                                            <div class="form-group">
+                                                <label for="score">Note (sur 100)</label>
+                                                <input type="number" id="score" name="score" 
+                                                       class="form-control" min="0" max="100" 
+                                                       step="0.1" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="feedback">Feedback</label>
+                                                <textarea id="feedback" name="feedback" 
+                                                          class="form-control" rows="4" 
+                                                          placeholder="Donnez un feedback constructif..."></textarea>
+                                            </div>
+                                            <button type="submit" class="btn-save">
+                                                <i class="fas fa-save"></i> Enregistrer l'évaluation
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% else %}
+                                    <div class="evaluation-result">
+                                        <h4>Évaluation</h4>
+                                        <div class="score">Note : {{ "%.1f"|format(answer.writing_score) }}%</div>
+                                        {% if answer.feedback %}
+                                            <div class="feedback">
+                                                <h5>Feedback :</h5>
+                                                <p>{{ answer.feedback|nl2br }}</p>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
                         {% else %}
-                            <em>Non répondue</em>
+                            <div class="answer-details">
+                                <div class="selected-answer">
+                                    <strong>Réponse donnée :</strong>
+                                    {% if answer.selected_answer %}
+                                        {{ answer.selected_answer.answer_text }}
+                                    {% else %}
+                                        <em>Non répondue</em>
+                                    {% endif %}
+                                </div>
+                                {% if not answer.is_correct %}
+                                    <div class="correct-answer">
+                                        <strong>Réponse correcte :</strong>
+                                        {{ answer.correct_answer.answer_text }}
+                                    </div>
+                                {% endif %}
+                            </div>
                         {% endif %}
                     </div>
                 </div>
-                
-                <div class="answer-row">
-                    <div class="answer-label">Réponse correcte:</div>
-                    <div class="answer-value correct">
-                        {{ detail.correct_answer.answer_text }}
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
         {% endfor %}
     </div>
-    
-    <div class="action-buttons">
-        <a href="javascript:history.back()" class="btn btn-secondary">
-            Retour à la liste
+
+    <div class="actions-bar">
+        <a href="{{ url_for('admin.pending_results') }}" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Retour
         </a>
-        
         {% if not result.validated %}
-        <form action="{{ url_for('admin.validate_result', result_id=result.id) }}" method="POST" class="d-inline">
-            <button type="submit" class="btn btn-primary">
-                Valider le résultat
-            </button>
-        </form>
+        <div class="validation-actions">
+            <a href="{{ url_for('admin.validate_result', result_id=result.id) }}" class="btn-validate">
+                <i class="fas fa-check"></i> Valider
+            </a>
+            <a href="{{ url_for('admin.reject_result', result_id=result.id) }}" class="btn-reject">
+                <i class="fas fa-times"></i> Rejeter
+            </a>
+        </div>
         {% endif %}
-        
-        <a href="{{ url_for('admin.generate_certificate', result_id=result.id) }}" class="btn btn-success">
-            Générer un certificat
-        </a>
     </div>
 </div>
 
 <style>
-.admin-container {
-    max-width: 1000px;
+.content-section {
+    padding: 2rem;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
-.admin-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.result-header {
     margin-bottom: 2rem;
 }
 
-.admin-section {
-    background: white;
-    border-radius: 5px;
-    padding: 1.5rem;
+.result-header h1 {
+    margin-bottom: 1.5rem;
+    color: #2c3e50;
+}
+
+.result-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 2rem;
+}
+
+.info-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.info-grid {
-    display: grid;
-    gap: 1rem;
-}
-
-.info-row {
-    display: grid;
-    grid-template-columns: 150px 1fr;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 0.5rem;
-}
-
 .info-label {
-    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #7f8c8d;
+    margin-bottom: 0.5rem;
 }
 
-.question-block {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    margin-bottom: 1.5rem;
+.info-label i {
+    font-size: 1.25rem;
+}
+
+.info-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.sections-container {
+    display: grid;
+    gap: 2rem;
+}
+
+.section-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-header {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.section-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: #2c3e50;
+}
+
+.section-score {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.section-content {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.reading-text {
+    color: #2c3e50;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: inherit;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.questions-list {
+    padding: 1.5rem;
+}
+
+.question-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.question-card:last-child {
+    margin-bottom: 0;
+}
+
+.question-card.writing {
+    border-left-color: #3498db;
+}
+
+.question-card.correct {
+    border-left-color: #2ecc71;
+}
+
+.question-card.incorrect {
+    border-left-color: #e74c3c;
 }
 
 .question-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.75rem 1rem;
-    background: #f8f9fa;
-    border-bottom: 1px solid #ddd;
-}
-
-.question-content {
-    padding: 1rem;
-}
-
-.question-text {
-    padding: 1rem;
-    background: #f8f9fa;
-    border-radius: 5px;
     margin-bottom: 1rem;
 }
 
-.answer-row {
-    display: grid;
-    grid-template-columns: 180px 1fr;
-    margin-bottom: 1rem;
+.question-type {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
 }
 
-.answer-label {
-    font-weight: bold;
-}
-
-.answer-value {
-    padding: 0.5rem;
-    border-radius: 3px;
-}
-
-.answer-value.correct {
-    background: rgba(40, 167, 69, 0.1);
-    border: 1px solid rgba(40, 167, 69, 0.2);
-}
-
-.answer-value.incorrect {
-    background: rgba(220, 53, 69, 0.1);
-    border: 1px solid rgba(220, 53, 69, 0.2);
+.question-status {
+    display: flex;
+    gap: 0.5rem;
 }
 
 .badge {
-    padding: 0.35em 0.65em;
-    font-size: 0.75em;
-    font-weight: 700;
-    border-radius: 0.25rem;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+.badge.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge.warning {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.badge.danger {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.question-content {
+    color: #2c3e50;
+}
+
+.question-text {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+}
+
+.writing-response {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.writing-response h4 {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+}
+
+.response-text {
+    color: #2c3e50;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-family: inherit;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.evaluation-form {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.evaluation-form h4 {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dce4ec;
+    border-radius: 4px;
+    font-size: 0.875rem;
+}
+
+input[type="number"].form-control {
+    max-width: 200px;
+}
+
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.evaluation-result {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.evaluation-result h4 {
+    color: #2c3e50;
+    margin: 0 0 1rem 0;
+}
+
+.score {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.feedback {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.feedback h5 {
+    color: #2c3e50;
+    margin: 0 0 0.5rem 0;
+}
+
+.feedback p {
+    color: #2c3e50;
+    line-height: 1.6;
+    margin: 0;
+}
+
+.answer-details {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.selected-answer, .correct-answer {
+    margin-bottom: 1rem;
+}
+
+.selected-answer:last-child, .correct-answer:last-child {
+    margin-bottom: 0;
+}
+
+.selected-answer strong, .correct-answer strong {
+    color: #2c3e50;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.actions-bar {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-back, .btn-validate, .btn-reject, .btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-back {
+    background: #6c757d;
     color: white;
 }
 
-.badge-success {
-    background-color: #28a745;
+.btn-validate {
+    background: #2ecc71;
+    color: white;
 }
 
-.badge-danger {
-    background-color: #dc3545;
+.btn-reject {
+    background: #e74c3c;
+    color: white;
 }
 
-.badge-warning {
-    background-color: #ffc107;
-    color: #212529;
+.btn-save {
+    background: #3498db;
+    color: white;
 }
 
-.action-buttons {
+.btn-back:hover { background: #5a6268; }
+.btn-validate:hover { background: #27ae60; }
+.btn-reject:hover { background: #c0392b; }
+.btn-save:hover { background: #2980b9; }
+
+.validation-actions {
     display: flex;
     gap: 1rem;
-    margin-bottom: 2rem;
 }
 
-.btn {
-    display: inline-block;
-    font-weight: 400;
-    text-align: center;
-    vertical-align: middle;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    text-decoration: none;
-}
+@media (max-width: 768px) {
+    .content-section {
+        padding: 1rem;
+    }
 
-.btn-primary {
-    color: #fff;
-    background-color: #007bff;
-    border: 1px solid #007bff;
-}
+    .result-overview {
+        grid-template-columns: 1fr;
+    }
 
-.btn-secondary {
-    color: #fff;
-    background-color: #6c757d;
-    border: 1px solid #6c757d;
-}
+    .section-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
 
-.btn-success {
-    color: #fff;
-    background-color: #28a745;
-    border: 1px solid #28a745;
+    .question-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        text-align: center;
+    }
+
+    .actions-bar {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .validation-actions {
+        width: 100%;
+        justify-content: center;
+    }
 }
 </style>
 {% endblock %}

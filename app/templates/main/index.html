@@ -16,7 +16,15 @@
         <p class="subtitle">Excellence et Innovation dans l'Apprentissage des Langues</p>
         <div class="cta-buttons">
             <a href="{{ url_for('auth.register') }}" class="btn btn-light">Commencer votre parcours</a>
-            <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light">Se connecter</a>
+            {% if current_user.is_authenticated %}
+                {% if current_user.role == 'admin' %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">Mon compte</a>
+                {% else %}
+                    <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-light">Mon compte</a>
+                {% endif %}
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="btn btn-outline-light">Se connecter</a>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -219,45 +227,11 @@
             {% if current_user.role == 'admin' %}
                 <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light">Accéder au Dashboard</a>
             {% else %}
-                <a href="{{ url_for('dashboard.user_dashboard') }}" class="btn btn-outline-light">Mon Tableau de Bord</a>
+                <a href="{{ url_for('dashboard.index') }}" class="btn btn-outline-light">Mon Tableau de Bord</a>
             {% endif %}
         {% else %}
             <a href="{{ url_for('auth.register') }}" class="btn btn-outline-light">S'inscrire Gratuitement</a>
         {% endif %}
     </div>
 </section>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-    // Menu mobile toggle
-    document.addEventListener('DOMContentLoaded', function() {
-        const menuToggle = document.getElementById('menuToggle');
-        const mobileMenu = document.getElementById('mobileMenu');
-        
-        if(menuToggle && mobileMenu) {
-            menuToggle.addEventListener('click', function() {
-                mobileMenu.classList.toggle('active');
-                
-                // Change icon based on menu state
-                const icon = menuToggle.querySelector('i');
-                if (mobileMenu.classList.contains('active')) {
-                    icon.classList.remove('fa-bars');
-                    icon.classList.add('fa-xmark');
-                    menuToggle.setAttribute('aria-label', 'Fermer le menu');
-                } else {
-                    icon.classList.remove('fa-xmark');
-                    icon.classList.add('fa-bars');
-                    menuToggle.setAttribute('aria-label', 'Ouvrir le menu');
-                }
-            });
-        }
-        
-        // Set current year in footer if the element exists
-        const currentYearElement = document.getElementById('currentYear');
-        if(currentYearElement) {
-            currentYearElement.textContent = new Date().getFullYear();
-        }
-    });
-</script>
 {% endblock %}

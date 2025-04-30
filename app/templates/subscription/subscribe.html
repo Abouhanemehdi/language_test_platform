@@ -1,0 +1,214 @@
+{% extends "layout_client.html" %}
+
+{% block title %}Abonnement Premium{% endblock %}
+
+{% block content %}
+<div class="admin-container">
+    <div class="page-header">
+        <div class="title-section text-center">
+            <h1>Abonnement Premium</h1>
+            <p class="subtitle">Accédez à tous nos tests de niveau et certificats</p>
+        </div>
+    </div>
+
+    <div class="content-section">
+        <div class="subscription-container">
+            <div class="subscription-summary">
+                <h3>Récapitulatif de l'offre</h3>
+                <div class="summary-details">
+                    <div class="summary-item">
+                        <i class="fas fa-infinity"></i>
+                        <div class="item-details">
+                            <h4>Tests illimités</h4>
+                            <p>Passez autant de tests que vous le souhaitez</p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-certificate"></i>
+                        <div class="item-details">
+                            <h4>Certificats officiels</h4>
+                            <p>Obtenez des certificats reconnus pour chaque niveau</p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-chart-line"></i>
+                        <div class="item-details">
+                            <h4>Suivi de progression</h4>
+                            <p>Visualisez votre évolution dans le temps</p>
+                        </div>
+                    </div>
+                    <div class="summary-item">
+                        <i class="fas fa-headset"></i>
+                        <div class="item-details">
+                            <h4>Support prioritaire</h4>
+                            <p>Assistance dédiée pour toutes vos questions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="payment-section">
+                <div class="price-card">
+                    <div class="price-header">
+                        <h3>Premium</h3>
+                        <div class="price">
+                            <span class="amount">29.99€</span>
+                            <span class="period">/mois</span>
+                        </div>
+                    </div>
+                    <div class="price-features">
+                        <p>Accès immédiat à toutes les fonctionnalités Premium</p>
+                        <p>Annulation possible à tout moment</p>
+                        <p>Satisfaction garantie pendant 30 jours</p>
+                    </div>
+                    <form action="{{ url_for('subscription.process_payment') }}" method="POST" class="payment-form">
+                        <button type="submit" class="action-button primary">
+                            <i class="fas fa-lock"></i> Payer en toute sécurité
+                        </button>
+                        <a href="{{ url_for('main.contact') }}" class="action-button secondary" style="margin-top: 1rem; display: block; text-align: center;">
+                            <i class="fas fa-envelope"></i> Contacter le service commercial
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.subscription-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.subscription-summary {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.subscription-summary h3 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+}
+
+.summary-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.summary-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.summary-item i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    padding: 0.5rem;
+    background: rgba(var(--primary-color-rgb), 0.1);
+    border-radius: 8px;
+}
+
+.item-details h4 {
+    margin: 0 0 0.5rem 0;
+    color: #333;
+}
+
+.item-details p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.payment-section {
+    position: sticky;
+    top: 2rem;
+}
+
+.price-card {
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.price-header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.price-header h3 {
+    color: var(--primary-color);
+    margin: 0 0 1rem 0;
+}
+
+.price {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.price .amount {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.price .period {
+    color: #666;
+    font-size: 0.875rem;
+}
+
+.price-features {
+    margin: 1.5rem 0;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.price-features p {
+    margin: 0.75rem 0;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.price-features p::before {
+    content: "✓";
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.payment-form {
+    margin-top: 1.5rem;
+}
+
+.payment-form button {
+    width: 100%;
+}
+
+@media (max-width: 992px) {
+    .subscription-container {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-section {
+        position: static;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-details {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %} 

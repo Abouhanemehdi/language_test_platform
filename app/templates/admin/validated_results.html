@@ -1,47 +1,452 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
-{% block title %}Résultats validés{% endblock %}
+{% block title %}Résultats Validés{% endblock %}
 
-{% block content %}
-<div class="admin-container">
-    <div class="admin-header">
-        <h1>Résultats validés</h1>
+{% block page_title %}Résultats Validés{% endblock %}
+
+{% block admin_content %}
+<div class="dashboard-container">
+    <!-- Section Statistiques -->
+    <div class="stats-section">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Validés</h3>
+                <div class="stat-value">{{ results|length }}</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Score Moyen</h3>
+                <div class="stat-value">
+                    {% if results %}
+                        {{ "%.1f"|format((results|map(attribute='score')|sum / results|length)) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Taux de Réussite</h3>
+                <div class="stat-value">
+                    {% if results %}
+                        {{ "%.1f"|format((results|selectattr('score', '>=', 60)|list|length / results|length * 100)) }}%
+                    {% else %}
+                        0%
+                    {% endif %}
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="admin-section">
-        {% if results %}
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Utilisateur</th>
-                        <th>Test</th>
-                        <th>Score</th>
-                        <th>Niveau</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for result in results %}
-                    <tr>
-                        <td>{{ result.user.username }}</td>
-                        <td>{{ result.test.title }}</td>
-                        <td>{{ "%.1f"|format(result.score) }}%</td>
-                        <td>{{ result.level_achieved }}</td>
-                        <td>{{ result.completed_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                        <td class="actions">
-                            <a href="{{ url_for('admin.view_result_detail', result_id=result.id) }}" 
-                               class="btn btn-sm btn-info">Voir détails</a>
-                            <a href="{{ url_for('admin.generate_certificate', result_id=result.id) }}" 
-                               class="btn btn-sm btn-success">Certificat</a>
-                        </td>
-                    </tr>
+    <!-- Section Filtres -->
+    <div class="filters-section">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" id="search-input" placeholder="Rechercher un candidat...">
+        </div>
+        <div class="filters-group">
+            <div class="filter-item">
+                <label for="test-filter">
+                    <i class="fas fa-book"></i> Test
+                </label>
+                <select id="test-filter">
+                    <option value="">Tous les tests</option>
+                    {% for test in tests %}
+                    <option value="{{ test.id }}">{{ test.title }}</option>
                     {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p class="empty-state">Aucun résultat validé.</p>
-        {% endif %}
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="level-filter">
+                    <i class="fas fa-layer-group"></i> Niveau
+                </label>
+                <select id="level-filter">
+                    <option value="">Tous les niveaux</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                </select>
+            </div>
+            <div class="filter-item">
+                <label for="date-filter">
+                    <i class="fas fa-calendar"></i> Date
+                </label>
+                <input type="date" id="date-filter">
+            </div>
+        </div>
+    </div>
+
+    <!-- Grille de Résultats -->
+    <div class="results-grid">
+        {% for result in results %}
+        <div class="result-card" 
+             data-test-id="{{ result.test.id }}" 
+             data-date="{{ result.completed_at.strftime('%Y-%m-%d') }}"
+             data-level="{{ result.level_achieved }}"
+             data-user="{{ result.user.username.lower() }}">
+            <div class="result-header">
+                <div class="result-title">
+                    <h3>{{ result.test.title }}</h3>
+                    <span class="badge {{ 'success' if result.validated else 'pending' }}">
+                        {{ 'Validé' if result.validated else 'En attente' }}
+                    </span>
+                </div>
+                <div class="score-circle" data-score="{{ result.score }}">
+                    <div class="score-text">{{ "%.0f"|format(result.score) }}%</div>
+                </div>
+            </div>
+            
+            <div class="result-info">
+                <div class="info-item">
+                    <i class="fas fa-user"></i>
+                    <span>{{ result.user.username }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>{{ result.completed_at.strftime('%d/%m/%Y') }}</span>
+                </div>
+                <div class="info-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    <span>Niveau {{ result.level_achieved }}</span>
+                </div>
+            </div>
+            
+            <div class="result-actions">
+                <a href="{{ url_for('admin.result_detail', result_id=result.id) }}" class="btn-view">
+                    <i class="fas fa-eye"></i> Voir détails
+                </a>
+                <button class="btn-download" onclick="downloadCertificate({{ result.id }})">
+                    <i class="fas fa-download"></i> Certificat
+                </button>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 </div>
+
+<style>
+.dashboard-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Stats Section */
+.stats-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    background: #f0f7ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+}
+
+.stat-icon i {
+    font-size: 24px;
+    color: #2196F3;
+}
+
+.stat-content h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 5px;
+}
+
+/* Filters Section */
+.filters-section {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.search-bar {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-bar i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.filters-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-item label {
+    font-size: 14px;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-item select,
+.filter-item input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+/* Results Grid */
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 20px;
+}
+
+.result-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.result-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.result-title {
+    flex: 1;
+}
+
+.result-title h3 {
+    margin: 0 0 10px 0;
+    font-size: 18px;
+    color: #333;
+}
+
+.score-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    position: relative;
+    background: #f0f7ff;
+}
+
+.score-text {
+    color: #2196F3;
+}
+
+.badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge.success {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.badge.pending {
+    background: #fff3e0;
+    color: #ef6c00;
+}
+
+.result-info {
+    margin-bottom: 20px;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.info-item i {
+    width: 20px;
+    color: #2196F3;
+}
+
+.result-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-view,
+.btn-download {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-view {
+    background: #2196F3;
+    color: white;
+    text-decoration: none;
+}
+
+.btn-view:hover {
+    background: #1976D2;
+}
+
+.btn-download {
+    background: #f0f7ff;
+    color: #2196F3;
+    border: none;
+}
+
+.btn-download:hover {
+    background: #e3f2fd;
+}
+
+@media (max-width: 768px) {
+    .stats-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .filters-group {
+        grid-template-columns: 1fr;
+    }
+    
+    .results-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .result-actions {
+        flex-direction: column;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('search-input');
+    const testFilter = document.getElementById('test-filter');
+    const levelFilter = document.getElementById('level-filter');
+    const dateFilter = document.getElementById('date-filter');
+    const resultCards = document.querySelectorAll('.result-card');
+    
+    function filterResults() {
+        const searchText = searchInput.value.toLowerCase();
+        const selectedTest = testFilter.value;
+        const selectedLevel = levelFilter.value;
+        const selectedDate = dateFilter.value;
+        
+        resultCards.forEach(card => {
+            const testMatch = !selectedTest || card.dataset.testId === selectedTest;
+            const levelMatch = !selectedLevel || card.dataset.level === selectedLevel;
+            const dateMatch = !selectedDate || card.dataset.date === selectedDate;
+            const searchMatch = !searchText || card.dataset.user.includes(searchText);
+            
+            card.style.display = (testMatch && levelMatch && dateMatch && searchMatch) ? 'block' : 'none';
+        });
+    }
+    
+    // Initialiser les cercles de score
+    resultCards.forEach(card => {
+        const scoreCircle = card.querySelector('.score-circle');
+        const score = parseFloat(scoreCircle.dataset.score);
+        const color = score >= 80 ? '#4CAF50' : 
+                     score >= 60 ? '#2196F3' : 
+                     score >= 40 ? '#FFC107' : '#F44336';
+        scoreCircle.style.border = `3px solid ${color}`;
+        scoreCircle.querySelector('.score-text').style.color = color;
+    });
+    
+    // Event listeners
+    searchInput.addEventListener('input', filterResults);
+    testFilter.addEventListener('change', filterResults);
+    levelFilter.addEventListener('change', filterResults);
+    dateFilter.addEventListener('change', filterResults);
+});
+
+function downloadCertificate(resultId) {
+    // Implémenter la logique de téléchargement du certificat
+    alert('Téléchargement du certificat en cours...');
+}
+</script>
 {% endblock %}

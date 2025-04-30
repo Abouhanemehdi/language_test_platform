@@ -1,0 +1,372 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Oxfor{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="admin-header">
+    <div class="logo">
+        <img src="{{ url_for('static', filename='images/oxfor-logo.png') }}" alt="Oxfor Language Center">
+    </div>
+    <nav class="admin-nav">
+        <a href="{{ url_for('dashboard.index') }}" class="nav-item active">
+            <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+        <a href="{{ url_for('test.available_tests') }}" class="nav-item">
+            <i class="fas fa-file-alt"></i> Tests
+        </a>
+        <a href="{{ url_for('admin.pending_results') }}" class="nav-item">
+            <i class="fas fa-clock"></i> En attente
+        </a>
+        <a href="{{ url_for('admin.validated_results') }}" class="nav-item">
+            <i class="fas fa-check-circle"></i> Validés
+        </a>
+    </nav>
+    <div class="admin-actions">
+        <a href="{{ url_for('auth.logout') }}" class="btn-logout">Déconnexion</a>
+    </div>
+</div>
+
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Mon Tableau de Bord</h1>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Tests complétés</h3>
+            <div class="stat-value">{{ completed_tests|length }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Tests en attente</h3>
+            <div class="stat-value">{{ pending_tests|length }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Certificats obtenus</h3>
+            <div class="stat-value">{{ certificates|length }}</div>
+        </div>
+    </div>
+
+    <!-- Tests disponibles -->
+    <div class="content-section">
+        <div class="section-header">
+            <h2>Tests disponibles</h2>
+            <div class="filters">
+                <select id="levelFilter" class="form-select">
+                    <option value="">Tous les niveaux</option>
+                    <option value="A1">A1</option>
+                    <option value="A2">A2</option>
+                    <option value="B1">B1</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                </select>
+            </div>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Niveau</th>
+                    <th>Questions</th>
+                    <th>Durée</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in available_tests %}
+                <tr data-level="{{ test.level }}">
+                    <td>{{ test.title }}</td>
+                    <td><span class="badge level-badge">{{ test.level }}</span></td>
+                    <td>{{ test.questions|length }}</td>
+                    <td>{{ test.duration }} min</td>
+                    <td>
+                        <a href="{{ url_for('test.take_test', test_id=test.id) }}" class="btn btn-primary">
+                            Commencer
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="5" class="text-center">Aucun test disponible pour le moment</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Résultats récents -->
+    <div class="content-section">
+        <div class="section-header">
+            <h2>Mes résultats récents</h2>
+        </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Test</th>
+                    <th>Niveau</th>
+                    <th>Score</th>
+                    <th>Date</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for result in recent_results %}
+                <tr>
+                    <td>{{ result.test.title }}</td>
+                    <td><span class="badge level-badge">{{ result.test.level }}</span></td>
+                    <td>{{ "%.1f"|format(result.score) }}%</td>
+                    <td>{{ result.completed_at.strftime('%d/%m/%Y') }}</td>
+                    <td>
+                        {% if result.validated %}
+                        <span class="badge status-badge success">Validé</span>
+                        {% else %}
+                        <span class="badge status-badge pending">En attente</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{{ url_for('test.show_result', result_id=result.id) }}" class="btn btn-secondary">
+                            Détails
+                        </a>
+                        {% if result.validated %}
+                        <a href="{{ url_for('test.download_certificate', result_id=result.id) }}" class="btn btn-primary">
+                            Certificat
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Aucun résultat pour le moment</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #031456;
+    --secondary-color: #FFD700;
+}
+
+.dashboard-container {
+    padding: 2rem;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    color: var(--primary-color);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.stat-card h3 {
+    margin: 0 0 1rem 0;
+    color: #666;
+    font-size: 1rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.content-section {
+    background: white;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.form-select {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-width: 150px;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 1rem;
+    border-bottom: 2px solid #eee;
+    color: #666;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.level-badge {
+    background: var(--primary-color);
+    color: white;
+}
+
+.status-badge.success {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.pending {
+    background: #ffc107;
+    color: #000;
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    margin-right: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #020f3d;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Header styles */
+.admin-header {
+    background-color: var(--primary-color);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.logo img {
+    height: 40px;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.nav-item {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.nav-item i {
+    font-size: 1rem;
+}
+
+.nav-item:hover, .nav-item.active {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.btn-logout {
+    background-color: var(--secondary-color);
+    color: var(--primary-color);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.btn-logout:hover {
+    background-color: #e6c200;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const levelFilter = document.getElementById('levelFilter');
+    if (levelFilter) {
+        levelFilter.addEventListener('change', function() {
+            const selectedLevel = this.value;
+            const rows = document.querySelectorAll('tbody tr[data-level]');
+            
+            rows.forEach(row => {
+                if (!selectedLevel || row.dataset.level === selectedLevel) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    }
+});
+</script>
+{% endblock %} 

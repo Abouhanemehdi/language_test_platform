@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Oxford Institut</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #002147;
+            --secondary-color: #FFD700;
+            --text-color: #333333;
+            --border-color: #DEE2E6;
+            --background-light: #F8F9FA;
+            --container-padding: 2rem;
+            --container-max-width: 1400px;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+        }
+
+        body {
+            background-color: var(--background-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .navbar {
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            min-height: 70px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: 0.75rem var(--container-padding);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        .logo-image {
+            height: 50px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #1a1a1a;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .nav-links a i {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-color);
+            background-color: rgba(0, 33, 71, 0.05);
+        }
+
+        .nav-links a.active {
+            color: var(--primary-color);
+            background-color: rgba(0, 33, 71, 0.05);
+        }
+
+        .auth-buttons {
+            margin-left: 1.5rem;
+            padding-left: 1.5rem;
+            border-left: 1px solid #e0e0e0;
+        }
+
+        .btn {
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        .btn i {
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #001a38;
+            transform: translateY(-1px);
+        }
+
+        /* Mobile Menu Styles */
+        .navbar-toggler {
+            display: none;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--primary-color);
+            margin-left: 1rem;
+        }
+
+        .navbar-toggler i {
+            font-size: 1.5rem;
+        }
+
+        main {
+            margin-top: 85px;
+            flex: 1;
+            width: 100%;
+            max-width: var(--container-max-width);
+            margin-left: auto;
+            margin-right: auto;
+            padding: var(--container-padding);
+            box-sizing: border-box;
+            background-color: transparent;
+        }
+
+        /* Styles pour la section des tests */
+        .tests-section {
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .tests-section table {
+            min-width: 800px; /* Largeur minimum pour assurer le scroll */
+            width: 100%;
+        }
+
+        /* Style pour la barre de défilement horizontale */
+        .tests-section::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .tests-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .tests-section::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .tests-section::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        .flash-messages {
+            position: fixed;
+            top: 85px;
+            right: 1rem;
+            z-index: 1000;
+        }
+
+        .flash {
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 6px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --container-padding: 1rem;
+            }
+
+            .container {
+                padding: 0.75rem var(--container-padding);
+            }
+
+            .navbar-toggler {
+                display: block;
+            }
+
+            .nav-links {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.5rem;
+                box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            }
+
+            .nav-links.show {
+                display: flex;
+            }
+
+            .nav-links a {
+                width: 100%;
+                padding: 0.75rem 1rem;
+            }
+
+            .auth-buttons {
+                margin: 0;
+                padding: 0;
+                border: none;
+                width: 100%;
+            }
+
+            .btn-primary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .logo-image {
+                height: 40px;
+            }
+
+            main {
+                padding: var(--container-padding);
+            }
+
+            .admin-container {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            /* Ajustements pour le scroll horizontal sur mobile */
+            .tests-section {
+                margin: 0 calc(-1 * var(--container-padding));
+                padding: 0 var(--container-padding);
+                width: calc(100% + (2 * var(--container-padding)));
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="container">
+                <a href="{{ url_for('main.index') }}" class="logo">
+                    <img src="{{ url_for('static', filename='images/image.png') }}" alt="Oxford Language Center Logo" class="logo-image">
+                </a>
+                
+                <button class="navbar-toggler" type="button" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="nav-links">
+                    <a href="{{ url_for('admin.dashboard') }}" {% if request.endpoint == 'admin.dashboard' %}class="active"{% endif %}>
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                    <a href="{{ url_for('admin.manage_tests') }}" {% if request.endpoint == 'admin.manage_tests' %}class="active"{% endif %}>
+                        <i class="fas fa-tasks"></i> Tests
+                    </a>
+                    <a href="{{ url_for('admin.pending_results') }}" {% if request.endpoint == 'admin.pending_results' %}class="active"{% endif %}>
+                        <i class="fas fa-clock"></i> En attente
+                    </a>
+                    <a href="{{ url_for('admin.manage_users') }}" {% if request.endpoint == 'admin.manage_users' %}class="active"{% endif %}>
+                        <i class="fas fa-users"></i> Utilisateurs
+                    </a>
+                    <a href="{{ url_for('admin.validated_results') }}" {% if request.endpoint == 'admin.validated_results' %}class="active"{% endif %}>
+                        <i class="fas fa-check-circle"></i> Validés
+                    </a>
+                    <div class="auth-buttons">
+                        <a href="{{ url_for('auth.logout') }}" class="btn btn-primary">
+                            <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navLinks = document.querySelector('.nav-links');
+            
+            navbarToggler.addEventListener('click', function() {
+                navLinks.classList.toggle('show');
+            });
+
+            // Fermer le menu mobile lors du clic sur un lien
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.addEventListener('click', () => {
+                    navLinks.classList.remove('show');
+                });
+            });
+
+            // Fermer le menu mobile lors du clic en dehors
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.navbar-toggler') && 
+                    !event.target.closest('.nav-links') && 
+                    navLinks.classList.contains('show')) {
+                    navLinks.classList.remove('show');
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

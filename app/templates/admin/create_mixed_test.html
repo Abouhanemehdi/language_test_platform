@@ -1,0 +1,614 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Créer un test mixte{% endblock %}
+
+{% block page_title %}Créer un test mixte{% endblock %}
+
+{% block admin_content %}
+<div class="content-section">
+    <form method="POST" action="{{ url_for('admin.create_mixed_test') }}" id="mixedTestForm">
+        <!-- Informations générales -->
+        <div class="form-section">
+            <div class="section-header">
+                <h2 class="section-title">Informations générales</h2>
+            </div>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="title">Titre du test</label>
+                    <input type="text" id="title" name="title" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="level">Niveau</label>
+                    <select id="level" name="level" class="form-control" required>
+                        <option value="A1">A1 - Débutant</option>
+                        <option value="A2">A2 - Élémentaire</option>
+                        <option value="B1">B1 - Intermédiaire</option>
+                        <option value="B2">B2 - Intermédiaire avancé</option>
+                        <option value="C1">C1 - Avancé</option>
+                        <option value="C2">C2 - Maîtrise</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="duration">Durée (minutes)</label>
+                    <input type="number" id="duration" name="duration" class="form-control" required min="10" max="180">
+                    <small class="form-text">Durée entre 10 et 180 minutes</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="user_role">Public cible</label>
+                    <select id="user_role" name="user_role" class="form-control" required>
+                        <option value="prospect">Prospect</option>
+                        <option value="client">Client</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="description">Description du test</label>
+                <textarea id="description" name="description" class="form-control" rows="3" required></textarea>
+            </div>
+        </div>
+
+        <!-- Sections du test -->
+        <div class="form-section" id="sectionsContainer">
+            <div class="section-header">
+                <h2 class="section-title">Sections du test</h2>
+                <div class="section-actions">
+                    <button type="button" class="btn-secondary" onclick="addSection('reading')">
+                        <i class="fas fa-book-reader"></i> Ajouter une section de lecture
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="addSection('qcm')">
+                        <i class="fas fa-list"></i> Ajouter une section QCM
+                    </button>
+                    <button type="button" class="btn-secondary" onclick="addSection('writing')">
+                        <i class="fas fa-pen"></i> Ajouter une section d'écriture
+                    </button>
+                </div>
+            </div>
+            <div id="sections" class="sections-list"></div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('admin.select_test_type') }}" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <button type="submit" class="btn-primary">
+                <i class="fas fa-save"></i> Créer le test
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Templates pour les différentes sections -->
+<template id="section-template">
+    <div class="section-card" data-section-index="INDEX">
+        <div class="section-card-header">
+            <h3>Section #<span class="section-number">INDEX</span></h3>
+            <button type="button" class="btn-icon delete" onclick="removeSection(this)" title="Supprimer la section">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="section-card-content">
+            <div class="form-group">
+                <label>Titre de la section</label>
+                <input type="text" class="form-control" name="sections[INDEX][title]" required>
+            </div>
+            <div class="form-group">
+                <label>Type de section</label>
+                <select class="form-control" name="sections[INDEX][type]" onchange="updateSectionContent(this)" required>
+                    <option value="reading">Compréhension écrite</option>
+                    <option value="qcm">QCM</option>
+                    <option value="writing">Expression écrite</option>
+                </select>
+            </div>
+            <div class="section-content"></div>
+        </div>
+    </div>
+</template>
+
+<template id="reading-content-template">
+    <div class="reading-section">
+        <div class="form-group">
+            <label>Texte de lecture</label>
+            <textarea class="form-control" name="sections[INDEX][content]" rows="6" required></textarea>
+        </div>
+        <div class="questions-container">
+            <div class="subsection-header">
+                <h4>Questions</h4>
+                <button type="button" class="btn-secondary" onclick="addQuestion(this, INDEX)">
+                    <i class="fas fa-plus"></i> Ajouter une question
+                </button>
+            </div>
+            <div class="questions-list"></div>
+        </div>
+    </div>
+</template>
+
+<template id="writing-content-template">
+    <div class="writing-section">
+        <div class="form-group">
+            <label>Consigne d'écriture</label>
+            <textarea class="form-control" name="sections[INDEX][content]" rows="4" required></textarea>
+        </div>
+        <div class="criteria-container">
+            <div class="subsection-header">
+                <h4>Critères d'évaluation</h4>
+                <button type="button" class="btn-secondary" onclick="addCriterion(this, INDEX)">
+                    <i class="fas fa-plus"></i> Ajouter un critère
+                </button>
+            </div>
+            <div class="criteria-list"></div>
+        </div>
+    </div>
+</template>
+
+<template id="qcm-content-template">
+    <div class="qcm-section">
+        <div class="form-group">
+            <label>Contenu de la section</label>
+            <textarea class="form-control" name="sections[INDEX][content]" rows="4" required></textarea>
+        </div>
+        <div class="questions-container">
+            <div class="subsection-header">
+                <h4>Questions</h4>
+                <button type="button" class="btn-secondary" onclick="addQuestion(this, INDEX)">
+                    <i class="fas fa-plus"></i> Ajouter une question
+                </button>
+            </div>
+            <div class="questions-list"></div>
+        </div>
+    </div>
+</template>
+
+<template id="question-template">
+    <div class="question-card">
+        <div class="question-header">
+            <h5>Question #<span class="question-number">NUMBER</span></h5>
+            <button type="button" class="btn-icon delete" onclick="removeQuestion(this)" title="Supprimer la question">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="form-group">
+            <label>Question</label>
+            <textarea class="form-control" name="sections[INDEX][questions][NUMBER][text]" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Points</label>
+            <input type="number" class="form-control" name="sections[INDEX][questions][NUMBER][points]" value="1" min="1" required>
+        </div>
+        <div class="answers-container">
+            <div class="subsection-header">
+                <h6>Réponses</h6>
+                <button type="button" class="btn-secondary" onclick="addAnswer(this)">
+                    <i class="fas fa-plus"></i> Ajouter une réponse
+                </button>
+            </div>
+            <div class="answers-list"></div>
+        </div>
+    </div>
+</template>
+
+<template id="answer-template">
+    <div class="answer-item">
+        <div class="form-group">
+            <div class="answer-input-group">
+                <input type="text" class="form-control" name="sections[INDEX][questions][QNUMBER][answers][ANUMBER][text]" placeholder="Réponse" required>
+                <label class="answer-correct">
+                    <input type="radio" name="sections[INDEX][questions][QNUMBER][correct_answer]" value="ANUMBER" required>
+                    <span class="checkmark"></span>
+                    Correcte
+                </label>
+                <button type="button" class="btn-icon delete" onclick="removeAnswer(this)" title="Supprimer la réponse">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
+<template id="criterion-template">
+    <div class="criterion-card">
+        <div class="criterion-header">
+            <h5>Critère #<span class="criterion-number">NUMBER</span></h5>
+            <button type="button" class="btn-icon delete" onclick="removeCriterion(this)" title="Supprimer le critère">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="form-group">
+            <label>Nom du critère</label>
+            <input type="text" class="form-control" name="sections[INDEX][criteria][NUMBER][name]" required>
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea class="form-control" name="sections[INDEX][criteria][NUMBER][description]" required></textarea>
+        </div>
+        <div class="form-group">
+            <label>Points maximum</label>
+            <input type="number" class="form-control" name="sections[INDEX][criteria][NUMBER][max_points]" value="5" min="1" required>
+        </div>
+    </div>
+</template>
+
+<style>
+.content-section {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.form-section {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    outline: none;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.section-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.section-card {
+    background: white;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.section-card-header {
+    background: #f8f9fa;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.section-card-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.section-card-content {
+    padding: 1.5rem;
+}
+
+.question-card, .criterion-card {
+    background: #f8f9fa;
+    border-radius: 6px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.question-header, .criterion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.question-header h5, .criterion-header h5 {
+    margin: 0;
+    font-size: 1rem;
+    color: #2c3e50;
+}
+
+.answers-container {
+    margin-top: 1rem;
+}
+
+.answer-item {
+    margin-bottom: 0.75rem;
+}
+
+.answer-input-group {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.answer-correct {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.btn-icon {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-icon.delete {
+    color: #e74c3c;
+    background: #fee;
+}
+
+.btn-icon.delete:hover {
+    background: #fdd;
+}
+
+.subsection-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.subsection-header h4, .subsection-header h6 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn-primary, .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    color: white;
+}
+
+.btn-secondary {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    border: 1px solid #e0e0e0;
+}
+
+.btn-secondary:hover {
+    background-color: #e9ecef;
+    color: #2c3e50;
+    text-decoration: none;
+}
+
+.form-text {
+    font-size: 0.75rem;
+    color: #7f8c8d;
+    margin-top: 0.25rem;
+}
+</style>
+
+<script>
+let sectionCount = 0;
+
+function addSection(type) {
+    const container = document.getElementById('sections');
+    const template = document.getElementById('section-template');
+    const sectionHtml = template.innerHTML.replace(/INDEX/g, sectionCount);
+    
+    const sectionDiv = document.createElement('div');
+    sectionDiv.innerHTML = sectionHtml;
+    const sectionElement = sectionDiv.firstElementChild;
+    sectionElement.dataset.sectionIndex = sectionCount;
+    container.appendChild(sectionElement);
+    
+    const select = sectionElement.querySelector(`[name="sections[${sectionCount}][type]"]`);
+    select.value = type;
+    updateSectionContent(select);
+    
+    sectionCount++;
+    updateSectionNumbers();
+}
+
+function removeSection(button) {
+    const section = button.closest('.section-card');
+    section.remove();
+    updateSectionNumbers();
+}
+
+function updateSectionContent(select) {
+    const section = select.closest('.section-card');
+    const contentContainer = section.querySelector('.section-content');
+    const sectionIndex = section.dataset.sectionIndex;
+    const type = select.value;
+    
+    const template = document.getElementById(`${type}-content-template`);
+    const contentHtml = template.innerHTML.replace(/INDEX/g, sectionIndex);
+    
+    contentContainer.innerHTML = contentHtml;
+}
+
+function addQuestion(button, sectionIndex) {
+    const container = button.closest('.questions-container').querySelector('.questions-list');
+    const template = document.getElementById('question-template');
+    const questionNumber = container.children.length;
+    
+    const questionHtml = template.innerHTML
+        .replace(/INDEX/g, sectionIndex)
+        .replace(/NUMBER/g, questionNumber);
+    
+    const questionDiv = document.createElement('div');
+    questionDiv.innerHTML = questionHtml;
+    container.appendChild(questionDiv.firstElementChild);
+    
+    updateQuestionNumbers(container);
+}
+
+function removeQuestion(button) {
+    const question = button.closest('.question-card');
+    const container = question.parentElement;
+    question.remove();
+    updateQuestionNumbers(container);
+}
+
+function addAnswer(button) {
+    const container = button.closest('.answers-container').querySelector('.answers-list');
+    const question = button.closest('.question-card');
+    const questionContainer = question.closest('.questions-list');
+    const sectionCard = question.closest('.section-card');
+    
+    const sectionIndex = sectionCard.dataset.sectionIndex;
+    const questionNumber = Array.from(questionContainer.children).indexOf(question);
+    const answerNumber = container.children.length;
+    
+    const template = document.getElementById('answer-template');
+    const answerHtml = template.innerHTML
+        .replace(/INDEX/g, sectionIndex)
+        .replace(/QNUMBER/g, questionNumber)
+        .replace(/ANUMBER/g, answerNumber);
+    
+    const answerDiv = document.createElement('div');
+    answerDiv.innerHTML = answerHtml;
+    container.appendChild(answerDiv.firstElementChild);
+}
+
+function removeAnswer(button) {
+    const answer = button.closest('.answer-item');
+    answer.remove();
+}
+
+function addCriterion(button, sectionIndex) {
+    const container = button.closest('.criteria-container').querySelector('.criteria-list');
+    const template = document.getElementById('criterion-template');
+    const criterionNumber = container.children.length;
+    
+    const criterionHtml = template.innerHTML
+        .replace(/INDEX/g, sectionIndex)
+        .replace(/NUMBER/g, criterionNumber);
+    
+    const criterionDiv = document.createElement('div');
+    criterionDiv.innerHTML = criterionHtml;
+    container.appendChild(criterionDiv.firstElementChild);
+    
+    updateCriterionNumbers(container);
+}
+
+function removeCriterion(button) {
+    const criterion = button.closest('.criterion-card');
+    const container = criterion.parentElement;
+    criterion.remove();
+    updateCriterionNumbers(container);
+}
+
+function updateSectionNumbers() {
+    const sections = document.querySelectorAll('.section-card');
+    sections.forEach((section, index) => {
+        section.querySelector('.section-number').textContent = index + 1;
+    });
+}
+
+function updateQuestionNumbers(container) {
+    const questions = container.querySelectorAll('.question-card');
+    questions.forEach((question, index) => {
+        question.querySelector('.question-number').textContent = index + 1;
+    });
+}
+
+function updateCriterionNumbers(container) {
+    const criteria = container.querySelectorAll('.criterion-card');
+    criteria.forEach((criterion, index) => {
+        criterion.querySelector('.criterion-number').textContent = index + 1;
+    });
+}
+
+// Validation du formulaire
+document.getElementById('mixedTestForm').addEventListener('submit', function(e) {
+    const sections = document.querySelectorAll('.section-card');
+    if (sections.length === 0) {
+        e.preventDefault();
+        alert('Veuillez ajouter au moins une section au test.');
+        return;
+    }
+    
+    let hasError = false;
+    sections.forEach(section => {
+        const type = section.querySelector('select[name*="[type]"]').value;
+        if (type === 'qcm' || type === 'reading') {
+            const questions = section.querySelectorAll('.question-card');
+            if (questions.length === 0) {
+                hasError = true;
+                alert('Chaque section QCM ou lecture doit contenir au moins une question.');
+            }
+            
+            questions.forEach(question => {
+                const answers = question.querySelectorAll('.answer-item');
+                if (answers.length < 2) {
+                    hasError = true;
+                    alert('Chaque question doit avoir au moins deux réponses possibles.');
+                }
+                
+                const hasCorrectAnswer = question.querySelector('input[type="radio"]:checked');
+                if (!hasCorrectAnswer) {
+                    hasError = true;
+                    alert('Veuillez sélectionner une réponse correcte pour chaque question.');
+                }
+            });
+        } else if (type === 'writing') {
+            const criteria = section.querySelectorAll('.criterion-card');
+            if (criteria.length === 0) {
+                hasError = true;
+                alert('Chaque section d\'écriture doit contenir au moins un critère d\'évaluation.');
+            }
+        }
+    });
+    
+    if (hasError) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %} 

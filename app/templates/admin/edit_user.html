@@ -1,0 +1,230 @@
+{% extends "admin/base_admin.html" %}
+
+{% block title %}Éditer {{ user.username }}{% endblock %}
+
+{% block page_title %}Éditer l'utilisateur{% endblock %}
+
+{% block admin_content %}
+<div class="content-section">
+    <div class="user-header">
+        <div class="user-avatar large">{{ user.username[0] | upper }}</div>
+        <div class="user-info">
+            <h2>{{ user.username }}</h2>
+            <p class="user-email">{{ user.email }}</p>
+            <span class="role-badge {% if user.role == 'admin' %}role-admin{% elif user.role == 'client' %}role-client{% else %}role-prospect{% endif %}">
+                {% if user.role == 'admin' %}
+                    <i class="fas fa-user-shield"></i> Admin
+                {% elif user.role == 'client' %}
+                    <i class="fas fa-user-tie"></i> Client
+                {% else %}
+                    <i class="fas fa-user"></i> Prospect
+                {% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="edit-sections">
+        <div class="edit-section">
+            <h3>Informations de base</h3>
+            <form method="POST" action="{{ url_for('admin.edit_user', user_id=user.id) }}" class="edit-form">
+                <input type="hidden" name="action" value="update_info">
+                <div class="form-group">
+                    <label>Nom d'utilisateur</label>
+                    <input type="text" name="username" value="{{ user.username }}" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ user.email }}" class="form-control" required>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Sauvegarder
+                </button>
+            </form>
+        </div>
+
+        {% if user.role != 'admin' %}
+        <div class="edit-section">
+            <h3>Gestion du rôle</h3>
+            <form method="POST" action="{{ url_for('admin.edit_user', user_id=user.id) }}" class="edit-form">
+                <input type="hidden" name="action" value="change_role">
+                <div class="form-group">
+                    <label>Rôle</label>
+                    <select name="role" class="form-control">
+                        <option value="prospect" {% if user.role == 'prospect' %}selected{% endif %}>Prospect</option>
+                        <option value="client" {% if user.role == 'client' %}selected{% endif %}>Client</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-user-tag"></i> Changer le rôle
+                </button>
+            </form>
+        </div>
+
+        <div class="edit-section">
+            <h3>Statut du compte</h3>
+            <form method="POST" action="{{ url_for('admin.edit_user', user_id=user.id) }}" class="edit-form">
+                <input type="hidden" name="action" value="{{ 'activate' if not user.is_active else 'deactivate' }}">
+                <p class="status-text">
+                    Le compte est actuellement 
+                    <span class="status-badge {% if user.is_active %}active{% endif %}">
+                        {{ "Actif" if user.is_active else "Inactif" }}
+                    </span>
+                </p>
+                <button type="submit" class="btn-{{ 'success' if not user.is_active else 'warning' }}">
+                    <i class="fas fa-{{ 'check' if not user.is_active else 'ban' }}"></i>
+                    {{ "Activer" if not user.is_active else "Désactiver" }} le compte
+                </button>
+            </form>
+        </div>
+
+        <div class="edit-section danger-zone">
+            <h3>Zone de danger</h3>
+            <p>Attention : La suppression d'un compte est irréversible.</p>
+            <button onclick="confirmDelete({{ user.id }})" class="btn-danger">
+                <i class="fas fa-trash"></i> Supprimer le compte
+            </button>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.user-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.user-avatar.large {
+    width: 80px;
+    height: 80px;
+    font-size: 2rem;
+}
+
+.user-info h2 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+}
+
+.user-email {
+    color: #7f8c8d;
+    margin: 0 0 0.5rem 0;
+}
+
+.edit-sections {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.edit-section {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.edit-section h3 {
+    margin: 0 0 1.5rem 0;
+    color: #2c3e50;
+    font-size: 1.25rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 2px rgba(52,152,219,0.2);
+}
+
+.status-text {
+    margin-bottom: 1rem;
+    color: #2c3e50;
+}
+
+.btn-primary, .btn-success, .btn-warning, .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary {
+    background-color: #3498db;
+    color: white;
+}
+
+.btn-success {
+    background-color: #2ecc71;
+    color: white;
+}
+
+.btn-warning {
+    background-color: #f1c40f;
+    color: #2c3e50;
+}
+
+.btn-danger {
+    background-color: #e74c3c;
+    color: white;
+}
+
+.btn-primary:hover { background-color: #2980b9; }
+.btn-success:hover { background-color: #27ae60; }
+.btn-warning:hover { background-color: #f39c12; }
+.btn-danger:hover { background-color: #c0392b; }
+
+.danger-zone {
+    border: 1px solid #ffcdd2;
+}
+
+.danger-zone h3 {
+    color: #c0392b;
+}
+
+.danger-zone p {
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+</style>
+
+<script>
+function confirmDelete(userId) {
+    const confirmMessage = 'Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.';
+    const deleteUrl = `/admin/delete_user/${userId}`;
+    if (confirm(confirmMessage)) {
+        window.location.href = deleteUrl;
+    }
+}
+</script>
+{% endblock %} 

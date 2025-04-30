@@ -17,28 +17,34 @@ def register():
         
     if request.method == 'POST':
         email = request.form.get('email')
-        password = request.form.get('password')
         username = request.form.get('username')
+        password = request.form.get('password')
+        phone = request.form.get('phone')
+        city = request.form.get('city')
         
         if User.query.filter_by(email=email).first():
-            flash("Cet email est déjà utilisé")
+            flash('Cet email est déjà utilisé.', 'error')
             return redirect(url_for('auth.register'))
             
         if User.query.filter_by(username=username).first():
-            flash("Ce nom d'utilisateur est déjà utilisé")
+            flash('Ce nom d\'utilisateur est déjà utilisé.', 'error')
             return redirect(url_for('auth.register'))
             
         user = User(
             email=email,
             username=username,
-            role='prospect'
+            phone=phone,
+            city=city,
+            role='prospect',
+            is_active=True,
+            created_at=datetime.utcnow()
         )
         user.set_password(password)
         
         db.session.add(user)
         db.session.commit()
         
-        flash("Inscription réussie !")
+        flash('Inscription réussie! Vous pouvez maintenant vous connecter.', 'success')
         return redirect(url_for('auth.login'))
         
     return render_template('auth/register.html')

@@ -1,76 +1,383 @@
-{% extends "base.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block title %}Dashboard Admin{% endblock %}
 
-{% block content %}
-<div class="admin-container">
-    <div class="admin-header">
-        <h1>Dashboard Administrateur</h1>
-        <a href="{{ url_for('admin.create_test') }}" class="btn btn-primary">Créer un nouveau test</a>
-    </div>
+{% block page_title %}Dashboard Administrateur{% endblock %}
 
-    <div class="dashboard-stats">
-        <div class="stat-card">
-            <h3>Tests actifs</h3>
-            <p class="stat-number">{{ active_tests_count }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Tests en attente de validation</h3>
-            <p class="stat-number">{{ pending_results_count }}</p>
-        </div>
-        <div class="stat-card">
-            <h3>Utilisateurs inscrits</h3>
-            <p class="stat-number">{{ users_count }}</p>
-        </div>
-    </div>
+{% block header_button %}
+<a href="{{ url_for('admin.create_test') }}" class="action-button">
+    Créer un nouveau test
+</a>
+{% endblock %}
 
-    <div class="admin-section">
-        <h2>Tests disponibles</h2>
-        {% if tests %}
-        <div class="table-responsive">
-            <table class="admin-table">
-                <thead>
-                    <tr>
-                        <th>Titre</th>
-                        <th>Niveau</th>
-                        <th>Questions</th>
-                        <th>Status</th>
-                        <th>Date de création</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for test in tests %}
-                    <tr>
-                        <td>{{ test.title }}</td>
-                        <td>{{ test.level }}</td>
-                        <td>{{ test.questions|length }}</td>
-                        <td>
-                            <span class="badge {% if test.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                                {{ "Actif" if test.is_active else "Inactif" }}
-                            </span>
-                        </td>
-                        <td>{{ test.created_at.strftime('%d/%m/%Y') }}</td>
-                        <td class="actions">
-                            <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn btn-sm btn-secondary">Éditer</a>
-                            <button onclick="confirmDelete({{ test.id }})" class="btn btn-sm btn-danger">Supprimer</button>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% else %}
-        <p class="empty-state">Aucun test n'a encore été créé.</p>
-        {% endif %}
+{% block admin_content %}
+<div class="stats-section">
+    <div class="stat-card">
+        <h3>Tests actifs</h3>
+        <span class="stat-number">{{ active_tests_count }}</span>
+    </div>
+    <div class="stat-card">
+        <h3>Tests en attente de validation</h3>
+        <span class="stat-number">{{ pending_results_count }}</span>
+    </div>
+    <div class="stat-card">
+        <h3>Utilisateurs inscrits</h3>
+        <span class="stat-number">{{ users_count }}</span>
     </div>
 </div>
+
+<div class="content-section">
+    <h2 class="section-title">Tests disponibles</h2>
+    <div class="data-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Titre</th>
+                    <th>Niveau</th>
+                    <th>Questions</th>
+                    <th>Status</th>
+                    <th>Date de création</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for test in tests %}
+                <tr>
+                    <td>{{ test.title }}</td>
+                    <td>{{ test.level }}</td>
+                    <td>{{ test.questions|length }}</td>
+                    <td><span class="status-badge {% if test.is_active %}active{% endif %}">ACTIF</span></td>
+                    <td>{{ test.created_at.strftime('%d/%m/%Y') }}</td>
+                    <td class="actions">
+                        <a href="{{ url_for('admin.edit_test', test_id=test.id) }}" class="btn-edit">Éditer</a>
+                        <button onclick="confirmDelete({{ test.id }})" class="btn-delete">Supprimer</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Section des demandes de contact -->
+<div class="content-section">
+    <div class="section-header">
+        <h2>Demandes de contact</h2>
+        <div class="filters">
+            <select class="filter-select" id="statusFilter">
+                <option value="all">Tous les statuts</option>
+                <option value="pending">En attente</option>
+                <option value="contacted">Contacté</option>
+                <option value="completed">Terminé</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Nom</th>
+                    <th>Téléphone</th>
+                    <th>Message</th>
+                    <th>Statut</th>
+                    <th>Source</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for request in contact_requests %}
+                <tr>
+                    <td>{{ request.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    <td>{{ request.name }}</td>
+                    <td>{{ request.phone }}</td>
+                    <td>{{ request.message[:100] }}{% if request.message|length > 100 %}...{% endif %}</td>
+                    <td>
+                        <span class="status-badge {{ request.status }}">
+                            {{ {
+                                'pending': 'En attente',
+                                'contacted': 'Contacté',
+                                'completed': 'Terminé'
+                            }[request.status] }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="source-badge {{ request.source }}">
+                            {{ {
+                                'general': 'Contact',
+                                'prospect': 'Prospect'
+                            }[request.source] }}
+                        </span>
+                    </td>
+                    <td class="actions">
+                        <button class="action-icon" onclick="updateStatus({{ request.id }}, 'contacted')" title="Marquer comme contacté">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="action-icon" onclick="updateStatus({{ request.id }}, 'completed')" title="Marquer comme terminé">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        <button class="action-icon" onclick="viewDetails({{ request.id }})" title="Voir détails">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal pour les détails de la demande -->
+<div id="contactRequestModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Détails de la demande</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <div class="detail-item">
+                <label>Nom:</label>
+                <span id="modal-name"></span>
+            </div>
+            <div class="detail-item">
+                <label>Email:</label>
+                <span id="modal-email"></span>
+            </div>
+            <div class="detail-item">
+                <label>Téléphone:</label>
+                <span id="modal-phone"></span>
+            </div>
+            <div class="detail-item">
+                <label>Date:</label>
+                <span id="modal-date"></span>
+            </div>
+            <div class="detail-item">
+                <label>Statut:</label>
+                <span id="modal-status"></span>
+            </div>
+            <div class="detail-item full-width">
+                <label>Message:</label>
+                <p id="modal-message"></p>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Fermer</button>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles pour les badges de statut */
+.status-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-badge.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-badge.contacted {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.status-badge.completed {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* Styles pour les badges de source */
+.source-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.source-badge.general {
+    background: #e3f2fd;
+    color: #1565c0;
+}
+
+.source-badge.prospect {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+/* Styles pour les actions */
+.actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-icon {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--background-light);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.action-icon:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Styles pour la modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 1.5rem;
+}
+
+.close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover {
+    color: var(--primary-color);
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.detail-item {
+    margin-bottom: 1rem;
+}
+
+.detail-item label {
+    font-weight: 600;
+    color: var(--text-color);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.detail-item span {
+    color: var(--text-light);
+}
+
+.detail-item.full-width {
+    grid-column: 1 / -1;
+}
+
+.detail-item p {
+    margin: 0;
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+    text-align: right;
+}
+</style>
 
 <script>
 function confirmDelete(testId) {
     if (confirm('Êtes-vous sûr de vouloir supprimer ce test ?')) {
         window.location.href = "{{ url_for('admin.delete_test', test_id=0) }}".replace('0', testId);
     }
+}
+
+function updateStatus(requestId, newStatus) {
+    fetch(`/admin/contact-request/${requestId}/status`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        }
+    });
+}
+
+function viewDetails(requestId) {
+    // Récupérer les détails de la demande
+    fetch(`/admin/contact-request/${requestId}`)
+        .then(response => response.json())
+        .then(data => {
+            // Remplir la modal avec les données
+            document.getElementById('modal-name').textContent = data.name;
+            document.getElementById('modal-email').textContent = data.email;
+            document.getElementById('modal-phone').textContent = data.phone;
+            document.getElementById('modal-date').textContent = data.created_at;
+            document.getElementById('modal-status').textContent = {
+                'pending': 'En attente',
+                'contacted': 'Contacté',
+                'completed': 'Terminé'
+            }[data.status];
+            document.getElementById('modal-message').textContent = data.message;
+            
+            // Afficher la modal
+            document.getElementById('contactRequestModal').style.display = 'block';
+        });
+}
+
+function closeModal() {
+    document.getElementById('contactRequestModal').style.display = 'none';
+}
+
+// Fermer la modal si on clique en dehors
+window.onclick = function(event) {
+    const modal = document.getElementById('contactRequestModal');
+    if (event.target == modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Fermer la modal avec le bouton X
+document.querySelector('.close').onclick = function() {
+    document.getElementById('contactRequestModal').style.display = 'none';
 }
 </script>
 {% endblock %}
